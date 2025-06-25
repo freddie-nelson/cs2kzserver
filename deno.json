@@ -1,0 +1,12 @@
+{
+  "nodeModulesDir": "auto",
+  "tasks": {
+    "dev": "deno run --env-file --watch main.ts",
+    "start": "deno run --env-file --allow-net --allow-run --allow-env --allow-sys --allow-write --allow-read main.ts"
+  },
+  "imports": {
+    "@std/assert": "jsr:@std/assert@1",
+    "adm-zip": "npm:adm-zip@0.5.16",
+    "windows-build-tools": "npm:windows-build-tools@^5.2.2"
+  }
+}
