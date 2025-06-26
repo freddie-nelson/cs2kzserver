@@ -1,25 +1,28 @@
 import JSZip from "npm:jszip@3.10.1";
 import { exists } from "jsr:@std/fs/exists";
 import { isAbsolute, join } from "node:path";
+import weaponPaintsConfig from "./weaponPaintsConfig.json" with { type: "json" };
 
-const KZSERVER_DIR = Deno.env.get("KZSERVER_DIR");
-const STEAMCMD_DIR = Deno.env.get("STEAMCMD_DIR");
-const STEAMCMD_DOWNLOAD_URL = Deno.env.get("STEAMCMD_DOWNLOAD_URL");
-const STEAM_GSLT_TOKEN = Deno.env.get("STEAM_GSLT_TOKEN");
-const METAMOD_DOWNLOAD_URL = Deno.env.get("METAMOD_DOWNLOAD_URL");
-const CS2KZ_PLUGIN_DOWNLOAD_URL = Deno.env.get("CS2KZ_PLUGIN_DOWNLOAD_URL");
-if (
-  !KZSERVER_DIR ||
-  !STEAMCMD_DIR ||
-  !STEAMCMD_DOWNLOAD_URL ||
-  !STEAM_GSLT_TOKEN ||
-  !METAMOD_DOWNLOAD_URL ||
-  !CS2KZ_PLUGIN_DOWNLOAD_URL
-) {
-  throw new Error(
-    "Environment variables KZSERVER_DIR, STEAMCMD_DIR, STEAMCMD_DOWNLOAD_URL, STEAM_GSLT_TOKEN, METAMOD_DOWNLOAD_URL, and CS2KZ_PLUGIN_DOWNLOAD_URL must be set."
-  );
+function getEnvVar(name: string): string {
+  const value = Deno.env.get(name);
+  if (!value) {
+    throw new Error(`Environment variable ${name} is not set.`);
+  }
+  return value;
 }
+
+const KZSERVER_DIR = toAbsolutePath(getEnvVar("KZSERVER_DIR"));
+const STEAMCMD_DIR = toAbsolutePath(getEnvVar("STEAMCMD_DIR"));
+const STEAMCMD_DOWNLOAD_URL = getEnvVar("STEAMCMD_DOWNLOAD_URL");
+const STEAM_GSLT_TOKEN = getEnvVar("STEAM_GSLT_TOKEN");
+const METAMOD_DOWNLOAD_URL = getEnvVar("METAMOD_DOWNLOAD_URL");
+const CS2KZ_PLUGIN_DOWNLOAD_URL = getEnvVar("CS2KZ_PLUGIN_DOWNLOAD_URL");
+const CSSHARP_PLUGIN_DOWNLOAD_URL = getEnvVar("CSSHARP_PLUGIN_DOWNLOAD_URL");
+const ANYBASELIBCS2_PLUGIN_DOWNLOAD_URL = getEnvVar("ANYBASELIBCS2_PLUGIN_DOWNLOAD_URL");
+const PLAYERSETTINGS_PLUGIN_DOWNLOAD_URL = getEnvVar("PLAYERSETTINGS_PLUGIN_DOWNLOAD_URL");
+const MENUMANAGER_PLUGIN_DOWNLOAD_URL = getEnvVar("MENUMANAGER_PLUGIN_DOWNLOAD_URL");
+const WEAPONPAINTS_PLUGIN_DOWNLOAD_URL = getEnvVar("WEAPONPAINTS_PLUGIN_DOWNLOAD_URL");
+const SQLMM_PLUGIN_DOWNLOAD_URL = getEnvVar("SQLMM_PLUGIN_DOWNLOAD_URL");
 
 function toAbsolutePath(path: string): string {
   if (isAbsolute(path)) {
@@ -28,13 +31,6 @@ function toAbsolutePath(path: string): string {
 
   return join(Deno.cwd(), path);
 }
-
-const kzServerDir = toAbsolutePath(KZSERVER_DIR);
-const steamCmdDir = toAbsolutePath(STEAMCMD_DIR);
-const steamCmdUrl = STEAMCMD_DOWNLOAD_URL;
-const steamGsltToken = STEAM_GSLT_TOKEN;
-const metamodUrl = METAMOD_DOWNLOAD_URL;
-const cs2KzPluginUrl = CS2KZ_PLUGIN_DOWNLOAD_URL;
 
 async function extractZip(zip: JSZip, targetDir: string) {
   for (const [filename, file] of Object.entries(zip.files)) {
@@ -105,15 +101,68 @@ function runSteamCmd(steamCmdPath: string, args: string[], output: "piped" | "in
 }
 
 /**
- * Checks if Metamod is installed in the CS2 server directory.
+ * Checks if a specific plugin is installed in the CS2 server.
  *
+ * @param pluginName The name of the plugin to check for installation. This should be the directory name of the plugin in the addons directory.
  * @param cs2Dir The directory where the CS2 server is installed.
  *
- * @returns Whether Metamod is installed in the CS2 server directory.
+ * @returns True if the plugin is installed, false otherwise.
  */
-async function isMetamodInstalled(cs2Dir: string) {
-  const metamodPath = join(cs2Dir, "./csgo/addons/metamod");
-  return await exists(metamodPath);
+async function isPluginInstalled(pluginName: string, cs2Dir: string) {
+  const pluginPath = join(cs2Dir, "./csgo/addons", pluginName);
+  return await exists(pluginPath);
+}
+
+/**
+ * Downloads and installs a plugin from a given URL to the CS2 server's csgo directory.
+ *
+ * @param url The URL to download the plugin from. Should be a url to a zip file.
+ * @param cs2Dir The directory where the CS2 server is installed.
+ * @param targetDir The target directory within the cs2Dir where the plugin should be installed. Defaults to "./csgo".
+ *
+ * @returns A promise that resolves when the plugin is installed.
+ */
+async function installPlugin(url: string, cs2Dir: string, targetDir: string = "./csgo") {
+  const response = await fetch(url);
+  if (!response.ok) {
+    throw new Error(`Failed to download plugin: ${response.statusText}`);
+  }
+
+  const zipData = await response.arrayBuffer();
+  const zip = new JSZip();
+  const zipContent = await zip.loadAsync(zipData);
+
+  // extract the contents of the zip file to the csgo directory
+  const csgoDir = join(cs2Dir, targetDir);
+  await extractZip(zipContent, csgoDir);
+}
+
+/**
+ * Installs a plugin to the CS2 server's addons directory, checking if it is already installed.
+ *
+ * @param url The URL to download the plugin from. Should be a url to a zip file.
+ * @param cs2Dir The directory where the CS2 server is installed.
+ * @param pluginName The name of the plugin to check for installation. This should be the directory name of the plugin in the addons directory.
+ * @param targetDir The target directory within the cs2Dir where the plugin should be installed. Defaults to "./csgo".
+ *
+ * @returns A promise that resolves to true if the plugin was installed successfully, false if it was already installed.
+ */
+async function installPluginWithChecks(url: string, cs2Dir: string, pluginName: string, targetDir?: string) {
+  if (await isPluginInstalled(pluginName, cs2Dir)) {
+    console.log(`${pluginName} is already installed in the CS2 server directory, skipping installation...`);
+    return false;
+  }
+
+  console.log(`${pluginName} is not installed, installing now...`);
+  await installPlugin(url, cs2Dir, targetDir);
+
+  if (await isPluginInstalled(pluginName, cs2Dir)) {
+    console.log(`${pluginName} installed successfully.`);
+  } else {
+    throw new Error(`${pluginName} installation failed. The addons/${pluginName} directory was not found.`);
+  }
+
+  return true;
 }
 
 /**
@@ -123,21 +172,13 @@ async function isMetamodInstalled(cs2Dir: string) {
  * @param cs2Dir The directory where the CS2
  */
 async function installMetamod(downloadUrl: string, cs2Dir: string) {
-  const response = await fetch(downloadUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to download Metamod: ${response.statusText}`);
+  const installed = await installPluginWithChecks(downloadUrl, cs2Dir, "metamod");
+  if (!installed) {
+    return;
   }
 
-  const zipData = await response.arrayBuffer();
-  const zip = new JSZip();
-  const zipContent = await zip.loadAsync(zipData);
-
-  // extract the contents of the zip file to the csgo directory
-  const csgoDir = join(cs2Dir, "./csgo");
-  await extractZip(zipContent, csgoDir);
-
   // Add line to gameinfo.gi to load Metamod
-  const gameInfoPath = join(csgoDir, "./gameinfo.gi");
+  const gameInfoPath = join(cs2Dir, "./csgo/gameinfo.gi");
   if (!(await exists(gameInfoPath))) {
     throw new Error(
       "CS2 server gameinfo.gi file not found. Please ensure CS2 server is installed correctly."
@@ -152,35 +193,50 @@ async function installMetamod(downloadUrl: string, cs2Dir: string) {
   await Deno.writeTextFile(gameInfoPath, updatedGameInfoContent);
 }
 
-/**
- * Checks if the CS2KZ plugin is installed in the CS2 server directory.
- *
- * @param cs2Dir The directory where the CS2 server is installed.
- *
- * @returns Whether the CS2KZ plugin is installed in the CS2 server directory.
- */
-async function isCs2KzPluginInstalled(cs2Dir: string) {
-  const cs2KzPath = join(cs2Dir, "./csgo/addons/cs2kz");
-  return await exists(cs2KzPath);
-}
-
-/**
- * Downloads and installs the CS2KZ plugin to the CS2 server's addons directory.
- *
- * @param cs2Dir The directory where the CS2 server is installed.
- */
-async function installCs2KzPlugin(cs2Dir: string) {
-  const response = await fetch(cs2KzPluginUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to download CS2KZ plugin: ${response.statusText}`);
+async function installWeaponPaints(downloadUrl: string, cs2Dir: string) {
+  const installed = await installPluginWithChecks(
+    downloadUrl,
+    cs2Dir,
+    "counterstrikesharp/plugins/WeaponPaints",
+    "./csgo/addons/counterstrikesharp/plugins"
+  );
+  if (!installed) {
+    return;
   }
 
-  const zipData = await response.arrayBuffer();
-  const zip = new JSZip();
-  const zipContent = await zip.loadAsync(zipData);
+  // move weaponpaints.json to the correct location
+  const csSharpDir = join(cs2Dir, "./csgo/addons/counterstrikesharp");
+  if (!(await exists(join(csSharpDir, "./gamedata")))) {
+    await Deno.mkdir(join(csSharpDir, "./gamedata"), { recursive: true });
+  }
 
-  const csgoDir = join(cs2Dir, "./csgo");
-  await extractZip(zipContent, csgoDir);
+  await Deno.rename(
+    join(csSharpDir, "./plugins/gamedata/weaponpaints.json"),
+    join(csSharpDir, "./gamedata/weaponpaints.json")
+  );
+  await Deno.remove(join(csSharpDir, "./plugins/gamedata"), { recursive: true });
+
+  // set FollowCS2ServerGuidelines to false in cssharp config
+  const configPath = join(csSharpDir, "./configs/core.json");
+  if (!(await exists(configPath))) {
+    await Deno.mkdir(join(csSharpDir, "./configs"), { recursive: true });
+    await Deno.writeTextFile(configPath, JSON.stringify({ FollowCS2ServerGuidelines: false }, null, 2));
+  } else {
+    const configContent = await Deno.readTextFile(configPath);
+    const configJson = JSON.parse(configContent);
+    configJson.FollowCS2ServerGuidelines = false;
+    await Deno.writeTextFile(configPath, JSON.stringify(configJson, null, 2));
+  }
+
+  // create weaponpaints config
+  const weaponPaintsConfigDir = join(csSharpDir, "./configs/plugins/WeaponPaints");
+  if (!(await exists(weaponPaintsConfigDir))) {
+    await Deno.mkdir(weaponPaintsConfigDir, { recursive: true });
+  }
+  const weaponPaintsConfigPath = join(weaponPaintsConfigDir, "WeaponPaints.json");
+  await Deno.writeTextFile(weaponPaintsConfigPath, JSON.stringify(weaponPaintsConfig, null, 2));
+
+  console.log("Weapon Paints installed successfully and CSSharp config updated.");
 }
 
 async function startCs2Server(
@@ -199,7 +255,7 @@ async function startCs2Server(
       "+map",
       "de_dust2",
       "+sv_setsteamaccount",
-      steamGsltToken,
+      STEAM_GSLT_TOKEN,
       "+hostport",
       port.toString(),
       "+host_workshop_map",
@@ -218,7 +274,7 @@ async function startCs2Server(
 }
 
 async function main() {
-  const cs2Dir = join(kzServerDir, "./game");
+  const cs2Dir = join(KZSERVER_DIR, "./game");
   const cs2ExecutablePath = join(cs2Dir, "./bin/win64/cs2.exe");
 
   // install CS2 server
@@ -234,10 +290,10 @@ async function main() {
     await cleanDirs();
 
     console.log("Installing CS2 server...");
-    const { steamCmdExecutable } = await downloadSteamCMD(steamCmdUrl, steamCmdDir);
+    const { steamCmdExecutable } = await downloadSteamCMD(STEAMCMD_DOWNLOAD_URL, STEAMCMD_DIR);
     const installServerProcess = runSteamCmd(steamCmdExecutable, [
       "+force_install_dir",
-      kzServerDir,
+      KZSERVER_DIR,
       "+login",
       "anonymous",
       "+app_update",
@@ -253,31 +309,26 @@ async function main() {
     }
   }
 
-  if (await isMetamodInstalled(cs2Dir)) {
-    console.log("Metamod is already installed in the CS2 server directory, skipping installation...");
-  } else {
-    console.log("Metamod is not installed, installing now...");
-    await installMetamod(metamodUrl, cs2Dir);
-
-    if (await isMetamodInstalled(cs2Dir)) {
-      console.log("Metamod installed successfully.");
-    } else {
-      throw new Error("Metamod installation failed. The addons/metamod directory was not found.");
-    }
-  }
-
-  if (await isCs2KzPluginInstalled(cs2Dir)) {
-    console.log("CS2KZ plugin is already installed in the CS2 server directory, skipping installation...");
-  } else {
-    console.log("CS2KZ plugin is not installed, installing now...");
-    await installCs2KzPlugin(cs2Dir);
-
-    if (await isCs2KzPluginInstalled(cs2Dir)) {
-      console.log("CS2KZ plugin installed successfully.");
-    } else {
-      throw new Error("CS2KZ plugin installation failed. The addons/cs2kz directory was not found.");
-    }
-  }
+  await installMetamod(METAMOD_DOWNLOAD_URL, cs2Dir);
+  await installPluginWithChecks(CSSHARP_PLUGIN_DOWNLOAD_URL, cs2Dir, "counterstrikesharp");
+  await installPluginWithChecks(CS2KZ_PLUGIN_DOWNLOAD_URL, cs2Dir, "cs2kz");
+  await installPluginWithChecks(SQLMM_PLUGIN_DOWNLOAD_URL, cs2Dir, "sql_mm");
+  await installPluginWithChecks(
+    ANYBASELIBCS2_PLUGIN_DOWNLOAD_URL,
+    cs2Dir,
+    "counterstrikesharp/shared/AnyBaseLib"
+  );
+  await installPluginWithChecks(
+    PLAYERSETTINGS_PLUGIN_DOWNLOAD_URL,
+    cs2Dir,
+    "counterstrikesharp/plugins/PlayerSettings"
+  );
+  await installPluginWithChecks(
+    MENUMANAGER_PLUGIN_DOWNLOAD_URL,
+    cs2Dir,
+    "counterstrikesharp/plugins/MenuManagerCore"
+  );
+  await installWeaponPaints(WEAPONPAINTS_PLUGIN_DOWNLOAD_URL, cs2Dir);
 
   console.log("Starting CS2 server...");
 
@@ -285,7 +336,7 @@ async function main() {
   await startCs2Server(cs2Dir, port);
 
   console.log(`CS2 server started on localhost:${port}.`);
-  console.log("You can now connect to the server using in game.");
+  console.log("You can now connect to the server in game.");
 }
 
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts
