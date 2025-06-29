@@ -1,0 +1,62 @@
+{
+  "VoteSettings": {
+    "RememberPlayedMaps": 1,
+    "MapsInVote": 8,
+    "VotesToWin": 0.6,
+    "AllowNominate": true,
+    "NominationsWASDMenu": true,
+    "EndMapVoteWASDMenu": true,
+    "VotingTime": 60,
+    "ExtendMapInVote": false,
+    "ExtendMapTimeMinutes": 10,
+    "ChangeMapAfterVote": true
+  },
+  "RTVSettings": {
+    "AllowRTV": true,
+    "RTVDelayFromStart": 1,
+    "IntervalBetweenRTV": 1,
+    "NoRTVafterRoundsPlayed": 0
+  },
+  "WinDrawSettings": {
+    "VoteDependsOnRoundWins": false,
+    "TriggerRoundsBeforeEnd": 1,
+    "TriggerRoundsBeforeEndVoteAtRoundStart": true,
+    "TriggerVoteAtRoundStartSecondsFromStart": 0,
+    "ChangeMapAfterWinDraw": false
+  },
+  "TimeLimitSettings": {
+    "VoteDependsOnTimeLimit": false,
+    "TriggerSecondsBeforeEnd": 35,
+    "ChangeMapAfterTimeLimit": false,
+    "VoteNextRoundStartAfterTrigger": false
+  },
+  "DiscordSettings": {
+    "DiscordWebhook": "",
+    "DiscordMessageMapStart": true,
+    "DiscordMessageAfterVote": false,
+    "PictureExtension": "jpg"
+  },
+  "MenuSettings": {
+    "SoundInMenu": true,
+    "FreezePlayerInMenu": false,
+    "FreezeAdminInMenu": true,
+    "ScrollUp": "W",
+    "ScrollDown": "S",
+    "Choose": "E",
+    "Back": "A",
+    "Exit": "R"
+  },
+  "OtherSettings": {
+    "PrintPlayersChoiceInChat": true,
+    "PrintNextMapForAll": true,
+    "DelayBeforeChangeSeconds": 3,
+    "VoteStartSound": "sounds/vo/announcer/cs2_classic/felix_broken_fang_pick_1_map_tk01.wav",
+    "RandomMapOnStart": false,
+    "RandomMapOnStartDelay": 20,
+    "LastDisconnectedChangeMap": true,
+    "WorkshopMapProblemCheck": true,
+    "TvStopRecord": false,
+    "DefaultMapWeight": 1
+  },
+  "ConfigVersion": 1
+}

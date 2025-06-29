@@ -2,6 +2,8 @@ import JSZip from "npm:jszip@3.10.1";
 import { exists } from "jsr:@std/fs/exists";
 import { isAbsolute, join } from "node:path";
 import weaponPaintsConfig from "./weaponPaintsConfig.json" with { type: "json" };
+import maps from "./maps.json" with { type: "json" };
+import mapChooserConfig from "./mapChooserConfig.json" with { type: "json" };
 
 function getEnvVar(name: string): string {
   const value = Deno.env.get(name);
@@ -23,6 +25,7 @@ const PLAYERSETTINGS_PLUGIN_DOWNLOAD_URL = getEnvVar("PLAYERSETTINGS_PLUGIN_DOWN
 const MENUMANAGER_PLUGIN_DOWNLOAD_URL = getEnvVar("MENUMANAGER_PLUGIN_DOWNLOAD_URL");
 const WEAPONPAINTS_PLUGIN_DOWNLOAD_URL = getEnvVar("WEAPONPAINTS_PLUGIN_DOWNLOAD_URL");
 const SQLMM_PLUGIN_DOWNLOAD_URL = getEnvVar("SQLMM_PLUGIN_DOWNLOAD_URL");
+const MAPCHOOSER_PLUGIN_DOWNLOAD_URL = getEnvVar("MAPCHOOSER_PLUGIN_DOWNLOAD_URL");
 
 function toAbsolutePath(path: string): string {
   if (isAbsolute(path)) {
@@ -32,11 +35,21 @@ function toAbsolutePath(path: string): string {
   return join(Deno.cwd(), path);
 }
 
-async function extractZip(zip: JSZip, targetDir: string) {
+async function extractZip(zip: JSZip, targetDir: string, baseDir?: string) {
+  baseDir = baseDir?.replace(/\\/g, "/"); // Normalize backslashes to forward slashes
+  baseDir = baseDir?.endsWith("/") ? baseDir : baseDir + "/";
+
   for (const [filename, file] of Object.entries(zip.files)) {
-    if (!file.dir) {
+    if (!file.dir && (!baseDir || filename.startsWith(baseDir))) {
       const fileData = await file.async("arraybuffer");
-      const filePath = join(targetDir, filename);
+      let filePath = join(targetDir, filename);
+
+      // If a base directory is specified, adjust the file path accordingly
+      if (baseDir) {
+        const relativePath = filename.replace(baseDir, "");
+        filePath = join(targetDir, relativePath);
+      }
+
       const fileDir = join(filePath, "..");
 
       // Ensure the directory exists
@@ -119,10 +132,11 @@ async function isPluginInstalled(pluginName: string, cs2Dir: string) {
  * @param url The URL to download the plugin from. Should be a url to a zip file.
  * @param cs2Dir The directory where the CS2 server is installed.
  * @param targetDir The target directory within the cs2Dir where the plugin should be installed. Defaults to "./csgo".
+ * @param baseDir The base directory inside the zip file to extract from. This is useful if the zip file contains a directory structure and you want to extract only a specific part of it. Defaults to undefined, which means the entire zip will be extracted.
  *
  * @returns A promise that resolves when the plugin is installed.
  */
-async function installPlugin(url: string, cs2Dir: string, targetDir: string = "./csgo") {
+async function installPlugin(url: string, cs2Dir: string, targetDir: string = "./csgo", baseDir?: string) {
   const response = await fetch(url);
   if (!response.ok) {
     throw new Error(`Failed to download plugin: ${response.statusText}`);
@@ -134,7 +148,7 @@ async function installPlugin(url: string, cs2Dir: string, targetDir: string = ".
 
   // extract the contents of the zip file to the csgo directory
   const csgoDir = join(cs2Dir, targetDir);
-  await extractZip(zipContent, csgoDir);
+  await extractZip(zipContent, csgoDir, baseDir);
 }
 
 /**
@@ -144,17 +158,18 @@ async function installPlugin(url: string, cs2Dir: string, targetDir: string = ".
  * @param cs2Dir The directory where the CS2 server is installed.
  * @param pluginName The name of the plugin to check for installation. This should be the directory name of the plugin in the addons directory.
  * @param targetDir The target directory within the cs2Dir where the plugin should be installed. Defaults to "./csgo".
+ * @param baseDir The base directory inside the zip file to extract from. This is useful if the zip file contains a directory structure and you want to extract only a specific part of it. Defaults to undefined, which means the entire zip will be extracted.
  *
  * @returns A promise that resolves to true if the plugin was installed successfully, false if it was already installed.
  */
-async function installPluginWithChecks(url: string, cs2Dir: string, pluginName: string, targetDir?: string) {
+async function installPluginWithChecks(url: string, cs2Dir: string, pluginName: string, targetDir?: string, baseDir?: string) {
   if (await isPluginInstalled(pluginName, cs2Dir)) {
     console.log(`${pluginName} is already installed in the CS2 server directory, skipping installation...`);
     return false;
   }
 
   console.log(`${pluginName} is not installed, installing now...`);
-  await installPlugin(url, cs2Dir, targetDir);
+  await installPlugin(url, cs2Dir, targetDir, baseDir);
 
   if (await isPluginInstalled(pluginName, cs2Dir)) {
     console.log(`${pluginName} installed successfully.`);
@@ -200,12 +215,22 @@ async function installWeaponPaints(downloadUrl: string, cs2Dir: string) {
     "counterstrikesharp/plugins/WeaponPaints",
     "./csgo/addons/counterstrikesharp/plugins"
   );
+
+  const csSharpDir = join(cs2Dir, "./csgo/addons/counterstrikesharp");
+
+  // create weaponpaints config
+  const weaponPaintsConfigDir = join(csSharpDir, "./configs/plugins/WeaponPaints");
+  if (!(await exists(weaponPaintsConfigDir))) {
+    await Deno.mkdir(weaponPaintsConfigDir, { recursive: true });
+  }
+  const weaponPaintsConfigPath = join(weaponPaintsConfigDir, "WeaponPaints.json");
+  await Deno.writeTextFile(weaponPaintsConfigPath, JSON.stringify(weaponPaintsConfig, null, 2));
+
   if (!installed) {
     return;
   }
 
   // move weaponpaints.json to the correct location
-  const csSharpDir = join(cs2Dir, "./csgo/addons/counterstrikesharp");
   if (!(await exists(join(csSharpDir, "./gamedata")))) {
     await Deno.mkdir(join(csSharpDir, "./gamedata"), { recursive: true });
   }
@@ -228,15 +253,123 @@ async function installWeaponPaints(downloadUrl: string, cs2Dir: string) {
     await Deno.writeTextFile(configPath, JSON.stringify(configJson, null, 2));
   }
 
-  // create weaponpaints config
-  const weaponPaintsConfigDir = join(csSharpDir, "./configs/plugins/WeaponPaints");
-  if (!(await exists(weaponPaintsConfigDir))) {
-    await Deno.mkdir(weaponPaintsConfigDir, { recursive: true });
-  }
-  const weaponPaintsConfigPath = join(weaponPaintsConfigDir, "WeaponPaints.json");
-  await Deno.writeTextFile(weaponPaintsConfigPath, JSON.stringify(weaponPaintsConfig, null, 2));
-
   console.log("Weapon Paints installed successfully and CSSharp config updated.");
+}
+
+async function installMapChooser(downloadUrl: string, cs2Dir: string) {
+  await installPluginWithChecks(
+    downloadUrl,
+    cs2Dir,
+    "counterstrikesharp/plugins/GG1MapChooser",
+    undefined,
+    "csgo"
+  );
+
+  // write maps to the correct location (will also update existing file)
+  const mapsFilePath = join(cs2Dir, "./csgo/cfg/GGMCmaps.json");
+  if ((await exists(join(mapsFilePath, "..")))) {
+    await Deno.writeTextFile(mapsFilePath, JSON.stringify(maps, null, 2));
+  }
+
+  // write map chooser config
+  const mapChooserConfigDir = join(cs2Dir, "./csgo/addons/counterstrikesharp/configs/plugins/GG1MapChooser")
+  if (!(await exists(mapChooserConfigDir))) {
+    await Deno.mkdir(mapChooserConfigDir, { recursive: true });
+  }
+  const mapChooserConfigPath = join(mapChooserConfigDir, "GG1MapChooser.json");
+  await Deno.writeTextFile(mapChooserConfigPath, JSON.stringify(mapChooserConfig, null, 2));
+}
+
+/**
+ * Disables a CSSharp plugin by renaming its .dll file to .dll.disabled.
+ * 
+ * @param pluginName The name of the plugin to disable. This should be the directory name of the plugin in the counterstrikesharp plugins directory.
+ * @param cs2Dir The directory where the CS2 server is installed.
+ */
+async function disableCsSharpPlugin(pluginName: string, cs2Dir: string) {
+  const pluginPath = join(cs2Dir, "./csgo/addons/counterstrikesharp/plugins", pluginName, `${pluginName}.dll`);
+  const disabledPluginPath = pluginPath + ".disabled";
+
+  if (await exists(disabledPluginPath)) {
+    console.log(`Plugin ${pluginName} is already disabled.`);
+    return;
+  }
+
+  if (!(await exists(pluginPath))) {
+    throw new Error(`Plugin ${pluginName} not found in CS2 server directory.`);
+  }
+
+  Deno.rename(pluginPath, disabledPluginPath);
+  console.log(`Plugin ${pluginName} has been disabled.`);
+}
+
+/**
+ * Enables a disabled CSSharp plugin by renaming its .dll.disabled file to .dll.
+ * 
+ * @param pluginName The name of the plugin to enable. This should be the directory name of the plugin in the counterstrikesharp plugins directory.
+ * @param cs2Dir The directory where the CS2 server is installed.
+ */
+async function enableCsSharpPlugin(pluginName: string, cs2Dir: string) {
+  const pluginPath = join(cs2Dir, "./csgo/addons/counterstrikesharp/plugins", pluginName, `${pluginName}.dll`);
+  const disabledPluginPath = pluginPath + ".disabled";
+
+  if (await exists(pluginPath)) {
+    console.log(`Plugin ${pluginName} is already enabled.`);
+    return;
+  }
+
+  if (!(await exists(disabledPluginPath))) {
+    throw new Error(`Plugin ${pluginName} not found in CS2 server directory.`);
+  }
+
+  Deno.rename(disabledPluginPath, pluginPath);
+  console.log(`Plugin ${pluginName} has been enabled.`);
+}
+
+/**
+ * Disables a Metamod plugin by renaming its .vdf file to .vdf.disabled.
+ * 
+ * @param pluginName The name of the Metamod plugin to disable. This should be the name of the .vdf file without the extension.
+ * @param cs2Dir The directory where the CS2 server is installed.
+ */
+async function disableMetamodPlugin(pluginName: string, cs2Dir: string) {
+  const pluginPath = join(cs2Dir, "./csgo/addons/metamod", `${pluginName}.vdf`);
+  const disabledPluginPath = pluginPath + ".disabled";
+
+  if (await exists(disabledPluginPath)) {
+    console.log(`Metamod plugin ${pluginName} is already disabled.`);
+    return;
+  }
+
+  if (!(await exists(pluginPath))) {
+    throw new Error(`Metamod plugin ${pluginName} not found in CS2 server directory.`);
+  }
+
+  Deno.rename(pluginPath, disabledPluginPath);
+  console.log(`Metamod plugin ${pluginName} has been disabled.`);
+}
+
+/**
+ * Enables a disabled Metamod plugin by renaming its .vdf.disabled file to .vdf.
+ * 
+ * @param pluginName The name of the Metamod plugin to enable. This should be the name of the .vdf file without the extension.
+ * @param cs2Dir The directory where the CS2 server is installed.
+ */
+async function enableMetamodPlugin(pluginName: string, cs2Dir: string) {
+  const pluginPath = join(cs2Dir, "./csgo/addons/metamod", `${pluginName}.vdf`);
+  const disabledPluginPath = pluginPath + ".disabled";
+
+  if (await exists(pluginPath)) {
+    console.log(`Metamod plugin ${pluginName} is already enabled.`);
+    return;
+  }
+
+  if (!(await exists(disabledPluginPath))) {
+    throw new Error(`Metamod plugin ${pluginName} not found in CS2 server directory.`);
+  }
+
+  Deno.rename(disabledPluginPath, pluginPath);
+  console.log(`Metamod plugin ${pluginName} has been enabled.`);
 }
 
 async function startCs2Server(
@@ -329,6 +462,7 @@ async function main() {
     "counterstrikesharp/plugins/MenuManagerCore"
   );
   await installWeaponPaints(WEAPONPAINTS_PLUGIN_DOWNLOAD_URL, cs2Dir);
+  await installMapChooser(MAPCHOOSER_PLUGIN_DOWNLOAD_URL, cs2Dir);
 
   console.log("Starting CS2 server...");
 

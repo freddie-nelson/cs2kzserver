@@ -1,0 +1,90 @@
+{
+  "kz_grotto": {
+    "ws": true,
+    "display": "KZ Grotto",
+    "mapid": "3121168339",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_igneous": {
+    "ws": true,
+    "display": "KZ Igneous",
+    "mapid": "3102712799",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_phamous": {
+    "ws": true,
+    "display": "KZ Phamous",
+    "mapid": "3104579274",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_victoria": {
+    "ws": true,
+    "display": "KZ Victoria",
+    "mapid": "3086304337",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_leto_v2": {
+    "ws": true,
+    "display": "KZ Leto V2",
+    "mapid": "3070830826",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_ehcivec_final": {
+    "ws": true,
+    "display": "KZ Ehcivec Final",
+    "mapid": "3082213334",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_niche": {
+    "ws": true,
+    "display": "KZ Niche",
+    "mapid": "3160291769",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_butterfly": {
+    "ws": true,
+    "display": "KZ Butterfly",
+    "mapid": "3248925340",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_variety_fix": {
+    "ws": true,
+    "display": "KZ Variety Fix",
+    "mapid": "3286019495",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_skytower": {
+    "ws": true,
+    "display": "KZ Skytower",
+    "mapid": "3276311176",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_lust": {
+    "ws": true,
+    "display": "KZ Lust",
+    "mapid": "3218634538",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  }
+}
