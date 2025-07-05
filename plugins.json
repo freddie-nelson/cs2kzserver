@@ -1,0 +1,89 @@
+[
+  {
+    "displayName": "Counter Strike Sharp",
+    "name": "counterstrikesharp",
+    "description": "Counter Strike Sharp is a C# plugin framework for Counter-Strike 2, allowing developers to create plugins using C#.",
+    "type": "metamod",
+    "downloadUrl": "https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v1.0.319/counterstrikesharp-with-runtime-windows-1.0.319.zip",
+    "dependencies": []
+  },
+  {
+    "displayName": "CS2KZ",
+    "name": "cs2kz",
+    "description": "CS2KZ is a skill-based mod for Counter-Strike 2 where players complete challenging obstacle courses that test their precision, speed, and movement skills.",
+    "type": "metamod",
+    "downloadUrl": "https://github.com/KZGlobalTeam/cs2kz-metamod/releases/download/v0.0.27/cs2kz-windows-master.zip",
+    "dependencies": []
+  },
+  {
+    "displayName": "SQLMM",
+    "name": "sql_mm",
+    "description": "SQLMM is a MetaMod plugin providing SQL connectors for MetaMod.",
+    "type": "metamod",
+    "downloadUrl": "https://github.com/zer0k-z/sql_mm/releases/download/1.3.4/package-windows.zip",
+    "dependencies": []
+  },
+  {
+    "displayName": "AnyBaseLib CS2",
+    "name": "AnyBaseLib",
+    "description": "Just an easy-connecting database api for SQLite/MySQL/PostgreSQL.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/NickFox007/AnyBaseLibCS2/releases/download/0.9.3/AnyBaseLib.zip",
+    "dependencies": [],
+    "isCounterStrikeSharpSharedPlugin": true
+  },
+  {
+    "displayName": "Player Settings",
+    "name": "PlayerSettings",
+    "description": "A ClientCookies analogue for CS2.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/NickFox007/PlayerSettingsCS2/releases/download/0.9.3/PlayerSettings.zip",
+    "dependencies": ["AnyBaseLib"]
+  },
+  {
+    "displayName": "Menu Manager",
+    "name": "MenuManagerCore",
+    "description": "A simple menu manager for CS2.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/NickFox007/MenuManagerCS2/releases/download/1.4.1/MenuManager.zip",
+    "dependencies": ["PlayerSettings"]
+  },
+  {
+    "displayName": "Weapon Paints",
+    "name": "WeaponPaints",
+    "description": "A simple skin changer plugin for CS2. Allows you to change knife, glove, weapon and agent skins.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/freddie-nelson/cs2-WeaponPaints/releases/download/build-1/WeaponPaints.zip",
+    "targetExtractDir": "@cssharpplugins",
+    "dependencies": ["MenuManager"],
+    "configs": [
+      {
+        "target": "@pluginconfig/WeaponPaints.json",
+        "config": "./weaponPaintsConfig.json"
+      },
+      {
+        "target": "@cssharp/gamedata/weaponpaints.json",
+        "config": "@cssharp/plugins/gamedata/weaponpaints.json"
+      }
+    ]
+  },
+  {
+    "displayName": "Map Chooser",
+    "name": "GG1MapChooser",
+    "description": "A simple map chooser for CS2.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/ssypchenko/GG1MapChooser/releases/download/v1.7.0/GG1MapChooser.1.7.0.zip",
+    "dependencies": [],
+    "dirInZipToExtract": "csgo",
+    "configs": [
+      {
+        "target": "@pluginconfig/GG1MapChooser.json",
+        "config": "./mapChooserConfig.json"
+      },
+      {
+        "target": "@csgo/cfg/GGMCmaps.json",
+        "config": "./maps.json"
+      }
+    ]
+  }
+]
