@@ -266,5 +266,21 @@
         "config": "./configs/matchzyAdmins.json"
       }
     ]
+  },
+  {
+    "displayName": "Change Level with Chat",
+    "name": "ChangeLevelChat",
+    "description": "CS2 plugin for an easy and fast map change.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/Kamiloo13/CS2_ChangeLevelChat/releases/download/v1.0.0/ChangeLevelChat_v1.0.0.zip",
+    "dependencies": [],
+    "targetExtractDir": "@cssharpplugins",
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@pluginconfig/ChangeLevelChat.json",
+        "config": "./configs/changeLevelChat.json"
+      }
+    ]
   }
 ]

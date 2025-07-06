@@ -1,0 +1,30 @@
+{
+  "isEnabled": true,
+  "Default Game Mode": "aim_maps",
+  "Game Modes": ["aim_maps", "smoke_train"],
+  "Maps": [
+    "ar_baggage",
+    "ar_shoots",
+    "cs_italy",
+    "cs_office",
+    "de_ancient",
+    "de_anubis",
+    "de_dust2",
+    "de_inferno",
+    "de_mirage",
+    "de_nuke",
+    "de_overpass",
+    "de_vertigo"
+  ],
+  "Workshop Maps": [
+    "aim_redline_fp",
+    "awp_india",
+    "awp_roost_fp",
+    "fy_pool_day",
+    "awp_lego2",
+    "aim_map",
+    "aim_redline"
+  ],
+  "Log Level": "Info",
+  "ConfigVersion": 1
+}
