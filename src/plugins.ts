@@ -148,45 +148,19 @@ export async function isPluginInstalled(plugin: Plugin) {
 }
 
 /**
- * Downloads and installs a plugin from a given URL to the CS2 server's csgo directory.
+ * Creates configuration files for a plugin, will update existing files if they already exist.
  *
- * @param plugin The plugin to install.
+ * @param plugin The plugin for which to create configs.
  *
- * @returns A promise that resolves to true if the plugin was installed, false if it was already installed.
+ * @returns A promise that resolves when the configs are created.
  */
-export async function installPlugin(plugin: Plugin): Promise<boolean> {
-  if (await isPluginInstalled(plugin)) {
-    console.log(
-      `${plugin.displayName} is already installed in the CS2 server directory, skipping installation...`
-    );
-    return false;
-  }
-
-  console.log(`Installing ${plugin.displayName}...`);
-
-  const response = await fetch(plugin.downloadUrl);
-  if (!response.ok) {
-    throw new Error(`Failed to download plugin: ${response.statusText}`);
-  }
-
-  const zipData = await response.arrayBuffer();
-  const zip = new JSZip();
-  const zipContent = await zip.loadAsync(zipData);
-
-  // extract the contents of the zip file to the csgo directory
-  const targetDir = resolvePluginDir(plugin, plugin.targetExtractDir);
-  const baseDir = plugin.dirInZipToExtract;
-  await extractZip(zipContent, targetDir, baseDir);
-
-  // check if the plugin directory exists after extraction
-  if (!(await isPluginInstalled(plugin))) {
-    throw new Error(`${plugin.displayName} installation failed.`);
-  }
-
+export async function installPluginConfigs(plugin: Plugin) {
   // create configs if provided
-  if (plugin.configs.length > 0) {
-    console.log(`Creating configs for ${plugin.displayName}...`);
+  if (plugin.configs.length === 0) {
+    return;
   }
+
+  console.log(`Creating configs for ${plugin.displayName}...`);
 
   for (const config of plugin.configs) {
     const targetPath = resolvePluginDir(plugin, config.target);
@@ -215,7 +189,49 @@ export async function installPlugin(plugin: Plugin): Promise<boolean> {
     await Deno.writeTextFile(targetPath, content);
   }
 
+  console.log(`Configs for ${plugin.displayName} created successfully.`);
+}
+
+/**
+ * Downloads and installs a plugin from a given URL to the CS2 server's csgo directory.
+ *
+ * @param plugin The plugin to install.
+ *
+ * @returns A promise that resolves to true if the plugin was installed, false if it was already installed.
+ */
+export async function installPlugin(plugin: Plugin): Promise<boolean> {
+  if (await isPluginInstalled(plugin)) {
+    console.log(
+      `${plugin.displayName} is already installed in the CS2 server directory, skipping installation...`
+    );
+    installPluginConfigs(plugin);
+    return false;
+  }
+
+  console.log(`Installing ${plugin.displayName}...`);
+
+  const response = await fetch(plugin.downloadUrl);
+  if (!response.ok) {
+    throw new Error(`Failed to download plugin: ${response.statusText}`);
+  }
+
+  const zipData = await response.arrayBuffer();
+  const zip = new JSZip();
+  const zipContent = await zip.loadAsync(zipData);
+
+  // extract the contents of the zip file to the csgo directory
+  const targetDir = resolvePluginDir(plugin, plugin.targetExtractDir);
+  const baseDir = plugin.dirInZipToExtract;
+  await extractZip(zipContent, targetDir, baseDir);
+
+  // check if the plugin directory exists after extraction
+  if (!(await isPluginInstalled(plugin))) {
+    throw new Error(`${plugin.displayName} installation failed.`);
+  }
+
   console.log(`${plugin.displayName} installed successfully.`);
+
+  installPluginConfigs(plugin);
 
   return true;
 }
@@ -372,4 +388,22 @@ export async function togglePlugin(plugin: Plugin, enable: boolean) {
   }
 
   plugin.enabled = enable;
+}
+
+/**
+ * Checks if all dependencies of a plugin are enabled.
+ *
+ * @param plugin The plugin to check dependencies for.
+ *
+ * @returns True if all dependencies are enabled, false otherwise.
+ */
+export function checkDependenciesAreEnabled(plugin: Plugin) {
+  const dependencies = plugin.dependencies || [];
+  for (const dep of dependencies) {
+    const depPlugin = pluginsMap.get(dep);
+    if (depPlugin && !depPlugin.enabled) {
+      return false;
+    }
+  }
+  return true;
 }

@@ -1,0 +1,11 @@
+{
+  "EnableTimer": true,
+  "EnableProgressBar": true,
+  "TimerStarting": 45,
+  "LeftSideTimer": "-[ ",
+  "RightSideTimer": " ]-",
+  "EnableColorMessage": true,
+  "SidesTimerColor": "45:white",
+  "TimeColor": "20:yellow, 10:red, 5:darkred",
+  "ProgressBarColor": "20:yellow, 10:red, 5:darkred"
+}

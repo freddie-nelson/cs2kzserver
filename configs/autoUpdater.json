@@ -1,0 +1,8 @@
+{
+  "ConfigVersion": 2,
+  "UpdateCheckInterval": 180,
+  "ShutdownDelay": 120,
+  "MinPlayersInstantShutdown": 1,
+  "MinPlayerPercentageShutdownAllowed": 0.6,
+  "ShutdownOnMapChangeIfPendingUpdate": true
+}

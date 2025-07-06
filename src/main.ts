@@ -1,4 +1,11 @@
-import { getPluginsOrderedByDependencies, installMetamod, installPlugin, togglePlugin } from "./plugins.ts";
+import {
+  checkDependenciesAreEnabled,
+  getPluginsOrderedByDependencies,
+  installMetamod,
+  installPlugin,
+  pluginsMap,
+  togglePlugin,
+} from "./plugins.ts";
 import { startCs2Server, updateOrInstallCs2Server } from "./cs2server.ts";
 
 async function main() {
@@ -9,6 +16,16 @@ async function main() {
   for (const plugin of getPluginsOrderedByDependencies()) {
     await installPlugin(plugin);
     await togglePlugin(plugin, plugin.enabled);
+
+    if (plugin.enabled && !checkDependenciesAreEnabled(plugin)) {
+      throw new Error(
+        `Plugin ${
+          plugin.displayName
+        } is enabled but its dependencies are not met. Please enable [${Array.from(plugin.dependencies)
+          .filter((dep) => !pluginsMap.get(dep)?.enabled)
+          .join(", ")}] to use ${plugin.displayName}.`
+      );
+    }
   }
 
   await startCs2Server();

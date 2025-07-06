@@ -1,0 +1,12 @@
+{
+  "PluginTag": " {red}[Medic]",
+  "MinHealth": 40,
+  "HealHealth": 100,
+  "Cost": 2000,
+  "ShowCall": true,
+  "MaxUse": 2,
+  "AccessFlag": "@css/ban",
+  "HealSuccessSound": "items/healthshot_success_01",
+  "HealFailureSound": "buttons/blip2",
+  "ConfigVersion": 3
+}

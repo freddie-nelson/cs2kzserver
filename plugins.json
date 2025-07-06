@@ -5,7 +5,18 @@
     "description": "Counter Strike Sharp is a C# plugin framework for Counter-Strike 2, allowing developers to create plugins using C#.",
     "type": "metamod",
     "downloadUrl": "https://github.com/roflmuffin/CounterStrikeSharp/releases/download/v1.0.319/counterstrikesharp-with-runtime-windows-1.0.319.zip",
-    "dependencies": []
+    "dependencies": [],
+    "enabled": true,
+    "configs": [
+      {
+        "target": "@cssharpconfigs/admins.json",
+        "config": "./configs/cssharpAdmins.json"
+      },
+      {
+        "target": "@cssharpconfigs/core.json",
+        "config": "./configs/cssharpCore.json"
+      }
+    ]
   },
   {
     "displayName": "CS2KZ",
@@ -13,7 +24,8 @@
     "description": "CS2KZ is a skill-based mod for Counter-Strike 2 where players complete challenging obstacle courses that test their precision, speed, and movement skills.",
     "type": "metamod",
     "downloadUrl": "https://github.com/KZGlobalTeam/cs2kz-metamod/releases/download/v0.0.27/cs2kz-windows-master.zip",
-    "dependencies": []
+    "dependencies": [],
+    "enabled": true
   },
   {
     "displayName": "SQLMM",
@@ -21,7 +33,8 @@
     "description": "SQLMM is a MetaMod plugin providing SQL connectors for MetaMod.",
     "type": "metamod",
     "downloadUrl": "https://github.com/zer0k-z/sql_mm/releases/download/1.3.4/package-windows.zip",
-    "dependencies": []
+    "dependencies": [],
+    "enabled": true
   },
   {
     "displayName": "AnyBaseLib CS2",
@@ -30,6 +43,7 @@
     "type": "counterstrikesharp",
     "downloadUrl": "https://github.com/NickFox007/AnyBaseLibCS2/releases/download/0.9.3/AnyBaseLib.zip",
     "dependencies": [],
+    "enabled": true,
     "isCounterStrikeSharpSharedPlugin": true
   },
   {
@@ -38,7 +52,8 @@
     "description": "A ClientCookies analogue for CS2.",
     "type": "counterstrikesharp",
     "downloadUrl": "https://github.com/NickFox007/PlayerSettingsCS2/releases/download/0.9.3/PlayerSettings.zip",
-    "dependencies": ["AnyBaseLib"]
+    "dependencies": ["AnyBaseLib"],
+    "enabled": true
   },
   {
     "displayName": "Menu Manager",
@@ -46,7 +61,8 @@
     "description": "A simple menu manager for CS2.",
     "type": "counterstrikesharp",
     "downloadUrl": "https://github.com/NickFox007/MenuManagerCS2/releases/download/1.4.1/MenuManager.zip",
-    "dependencies": ["PlayerSettings"]
+    "dependencies": ["PlayerSettings"],
+    "enabled": true
   },
   {
     "displayName": "Weapon Paints",
@@ -56,10 +72,11 @@
     "downloadUrl": "https://github.com/freddie-nelson/cs2-WeaponPaints/releases/download/build-1/WeaponPaints.zip",
     "targetExtractDir": "@cssharpplugins",
     "dependencies": ["MenuManager"],
+    "enabled": true,
     "configs": [
       {
         "target": "@pluginconfig/WeaponPaints.json",
-        "config": "./weaponPaintsConfig.json"
+        "config": "./configs/weaponPaints.json"
       },
       {
         "target": "@cssharp/gamedata/weaponpaints.json",
@@ -75,14 +92,178 @@
     "downloadUrl": "https://github.com/ssypchenko/GG1MapChooser/releases/download/v1.7.0/GG1MapChooser.1.7.0.zip",
     "dependencies": [],
     "dirInZipToExtract": "csgo",
+    "enabled": true,
     "configs": [
       {
         "target": "@pluginconfig/GG1MapChooser.json",
-        "config": "./mapChooserConfig.json"
+        "config": "./configs/mapChooser.json"
       },
       {
         "target": "@csgo/cfg/GGMCmaps.json",
-        "config": "./maps.json"
+        "config": "./configs/maps.json"
+      }
+    ]
+  },
+  {
+    "displayName": "CS2 Instant Plant",
+    "name": "InstaplantPlugin",
+    "description": "A plugin that allows terrorists to plant the bomb instantly in CS2.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/B3none/cs2-instaplant/releases/download/1.0.0/cs2-instaplant-1.0.0.zip",
+    "dependencies": [],
+    "targetExtractDir": "@cssharpplugins",
+    "enabled": false
+  },
+  {
+    "displayName": "CS2 Kill Sound",
+    "name": "Kill-Sound-GoldKingZ",
+    "description": "Play a sound when a player is killed.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/oqyh/cs2-Kill-Sound-GoldKingZ/releases/download/1.1.1/Kill-Sound-GoldKingZ.1.1.1.zip",
+    "dependencies": [],
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@plugin/config/config.json",
+        "config": "./configs/killSound.json"
+      }
+    ]
+  },
+  {
+    "displayName": "CS2 Retakes",
+    "name": "RetakesPlugin",
+    "description": "CS2 implementation of retakes written in C# for CounterStrikeSharp. Based on the version for CS:GO by Splewis.",
+    "type": "counterstrikesharp",
+    "targetExtractDir": "@cssharpplugins",
+    "downloadUrl": "https://github.com/B3none/cs2-retakes/releases/download/2.1.2/cs2-retakes-2.1.2.zip",
+    "dependencies": ["RetakesPluginShared"],
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@plugin/retakes_config.json",
+        "config": "./configs/retakes.json"
+      }
+    ]
+  },
+  {
+    "displayName": "CS2 Retakes (Shared)",
+    "name": "RetakesPluginShared",
+    "description": "CS2 implementation of retakes written in C# for CounterStrikeSharp. Based on the version for CS:GO by Splewis.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/B3none/cs2-retakes/releases/download/2.1.2/cs2-retakes-shared-2.1.2.zip",
+    "dependencies": ["RetakesPlugin"],
+    "isCounterStrikeSharpSharedPlugin": true,
+    "enabled": false
+  },
+  {
+    "displayName": "Medic",
+    "name": "medic",
+    "description": "Allows you to refill your health.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/Quake1011/Medic/archive/refs/tags/0.1.1.zip",
+    "dependencies": [],
+    "targetExtractDir": "@plugin",
+    "dirInZipToExtract": "Medic-0.1.1/build",
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@pluginconfig/medic.json",
+        "config": "./configs/medic.json"
+      }
+    ]
+  },
+  {
+    "displayName": "CSS C4 Timer",
+    "name": "C4Timer",
+    "description": "This plugin adds countdown to c4 bomb explosion to your server.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/R0mz1k/css-C4-Timer/releases/download/v1.6/C4Timer.zip",
+    "dependencies": [],
+    "targetExtractDir": "@cssharpplugins",
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@pluginconfig/C4Timer.json",
+        "config": "./configs/C4Timer.json"
+      }
+    ]
+  },
+  {
+    "displayName": "CS2 Auto Updater",
+    "name": "AutoUpdater",
+    "description": "A plugin that automatically updates CS2 server files.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/dran1x/CS2-AutoUpdater/releases/download/v1.0.4/AutoUpdater.1.0.4.zip",
+    "dependencies": [],
+    "targetExtractDir": "@cssharp",
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@pluginconfig/AutoUpdater.json",
+        "config": "./configs/autoUpdater.json"
+      }
+    ]
+  },
+  {
+    "displayName": "CS2 Instant Defuse",
+    "name": "CS2InstantDefuse",
+    "description": "A plugin that allows the bomb to be defused instantly if some criteria are met.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/LordFetznschaedl/CS2InstantDefuse/releases/download/v1.3.0/CSInstantDefuse-1.3.0.zip",
+    "dependencies": [],
+    "dirInZipToExtract": "CSInstantDefuse-1.3.0",
+    "enabled": false
+  },
+  {
+    "displayName": "Go Spec",
+    "name": "GoSpec",
+    "description": "CounterStrikeSharp plugin for allowing players to move themselves to spec by typing !spec in chat.",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/joahreason/GoSpec/releases/download/release-v1.2/gospec-v1.2.zip",
+    "dependencies": [],
+    "targetExtractDir": "@cssharpplugins",
+    "enabled": false
+  },
+  {
+    "displayName": "Movement Unlocker",
+    "name": "MovementUnlocker",
+    "description": "Removes max speed limitation from players on the ground, feels like CS:S",
+    "type": "metamod",
+    "downloadUrl": "https://github.com/Source2ZE/MovementUnlocker/releases/download/v1.4/MovementUnlocker-v1.4-windows.zip",
+    "dependencies": [],
+    "enabled": false
+  },
+  {
+    "displayName": "CS2 Simple Admin",
+    "name": "CS2-SimpleAdmin",
+    "description": "Manage your Counter-Strike 2 server by simple commands :)",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/daffyyyy/CS2-SimpleAdmin/releases/download/build-298/CS2-SimpleAdmin-298.zip",
+    "targetExtractDir": "@addons",
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@pluginconfig/CS2-SimpleAdmin.json",
+        "config": "./configs/CS2SimpleAdmin.json"
+      }
+    ]
+  },
+  {
+    "displayName": "MatchZy",
+    "name": "MatchZy",
+    "description": "MatchZy is a plugin for CS2 for running and managing practice/pugs/scrims/matches with easy configuration and Get5 (G5API/G5V) support as well!",
+    "type": "counterstrikesharp",
+    "downloadUrl": "https://github.com/shobhit-pathak/MatchZy/releases/download/0.8.10/MatchZy-0.8.10.zip",
+    "dependencies": [],
+    "enabled": false,
+    "configs": [
+      {
+        "target": "@csgo/cfg/MatchZy/config.cfg",
+        "config": "./configs/matchzy.cfg"
+      },
+      {
+        "target": "@csgo/cfg/MatchZy/admins.json",
+        "config": "./configs/matchzyAdmins.json"
       }
     ]
   }

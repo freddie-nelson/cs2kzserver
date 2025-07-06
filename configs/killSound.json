@@ -1,0 +1,22 @@
+{
+  "KS_EnableQuakeSounds": false,
+  "KS_DisableQuakeSoundsOnWarmUp": true,
+  "KS_ResetKillStreakOnEveryRound": true,
+  "KS_UseMySql": false,
+  "KS_AddMenu_FreezeOnOpenMenu": true,
+  "KS_AddMenu_HeadShotKillSoundPath": "sounds/GoldKingZ/Training/bell_normal.vsnd_c",
+  "KS_AddMenu_BodyKillSoundPath": "sounds/GoldKingZ/Training/timer_bell.vsnd_c",
+  "KS_AddMenu_HeadShotHitSoundPath": "sounds/GoldKingZ/Training/bell_impact.vsnd_c",
+  "KS_AddMenu_BodyHitSoundPath": "sounds/GoldKingZ/Training/timer_bell.vsnd_c",
+  "KS_AddMenu_QuakeSoundsToggle": true,
+  "KS_AddMenu_QuakeCenterMessageToggle": true,
+  "KS_AddMenu_QuakeChatMessageToggle": true,
+  "KS_DefaultValue_FreezeOnOpenMenu": true,
+  "KS_DefaultValue_HeadShotKillSound": true,
+  "KS_DefaultValue_BodyKillSound": false,
+  "KS_DefaultValue_HeadShotHitSound": false,
+  "KS_DefaultValue_BodyHitSound": false,
+  "KS_InGameMenu": "!soundmenu,!soundsmenu,!menusound,!menusounds",
+  "KS_OnlyAllowTheseGroupsToToggle": "",
+  "KS_AutoRemovePlayerCookieOlderThanXDays": 7
+}
