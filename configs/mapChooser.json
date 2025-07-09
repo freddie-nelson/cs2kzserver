@@ -1,7 +1,7 @@
 {
   "VoteSettings": {
     "RememberPlayedMaps": 1,
-    "MapsInVote": 8,
+    "MapsInVote": 20,
     "VotesToWin": 0.6,
     "AllowNominate": true,
     "NominationsWASDMenu": true,

@@ -89,8 +89,32 @@
   },
   "kz_checkmate": {
     "ws": true,
-    "display": "KZ Lust",
+    "display": "KZ Checkmate",
     "mapid": "3070194623",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_summercliff2": {
+    "ws": true,
+    "display": "KZ Summercliff 2",
+    "mapid": "3353950265",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_gigablock_cs2": {
+    "ws": true,
+    "display": "KZ Gigablock CS2",
+    "mapid": "219883470",
+    "minplayers": 1,
+    "maxplayers": 20,
+    "weight": 1
+  },
+  "kz_refurinfunflay": {
+    "ws": true,
+    "display": "KZ Refurinfunflay",
+    "mapid": "3485831149",
     "minplayers": 1,
     "maxplayers": 20,
     "weight": 1

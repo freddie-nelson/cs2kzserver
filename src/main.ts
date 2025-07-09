@@ -7,6 +7,7 @@ import {
   togglePlugin,
 } from "./plugins.ts";
 import { startCs2Server, updateOrInstallCs2Server } from "./cs2server.ts";
+import { startClient } from "./client.ts";
 
 async function main() {
   await updateOrInstallCs2Server();
@@ -29,6 +30,7 @@ async function main() {
   }
 
   await startCs2Server();
+  await startClient();
 }
 
 // Learn more at https://docs.deno.com/runtime/manual/examples/module_metadata#concepts

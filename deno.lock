@@ -4,6 +4,7 @@
     "jsr:@std/assert@1": "1.0.13",
     "jsr:@std/fs@*": "1.0.18",
     "jsr:@std/internal@^1.0.6": "1.0.8",
+    "npm:@types/mime-types@3.0.1": "3.0.1",
     "npm:@types/node@*": "22.15.15",
     "npm:adm-zip@*": "0.5.1",
     "npm:adm-zip@0": "0.5.1",
@@ -11,6 +12,7 @@
     "npm:adm-zip@0.5.1": "0.5.1",
     "npm:adm-zip@0.5.16": "0.5.16",
     "npm:jszip@3.10.1": "3.10.1",
+    "npm:mime-types@3.0.1": "3.0.1",
     "npm:steamcmd-interface@5.0.0": "5.0.0",
     "npm:windows-build-tools@5.2.2": "5.2.2",
     "npm:zod@3.25.74": "3.25.74"
@@ -41,6 +43,9 @@
     },
     "@tokenizer/token@0.3.0": {
       "integrity": "sha512-OvjF+z51L3ov0OyAU0duzsYuvO01PH7x4t6DJx+guahgTnBHkhJdG7soQeTSFLWN3efnHyibZ4Z8l2EuWwJN3A=="
+    },
+    "@types/mime-types@3.0.1": {
+      "integrity": "sha512-xRMsfuQbnRq1Ef+C+RKaENOxXX87Ygl38W1vDfPHRku02TgQr+Qd8iivLtAMcR0KF5/29xlnFihkTlbqFrGOVQ=="
     },
     "@types/node@22.15.15": {
       "integrity": "sha512-R5muMcZob3/Jjchn5LcO8jdKwSCbzqmPB6ruBxMcf9kbxtniZHP327s6C37iOfuw8mbKK3cAQa7sEl7afLrQ8A==",
@@ -296,7 +301,7 @@
       "dependencies": [
         "asynckit",
         "combined-stream",
-        "mime-types"
+        "mime-types@2.1.35"
       ]
     },
     "form-data@4.0.3": {
@@ -306,7 +311,7 @@
         "combined-stream",
         "es-set-tostringtag",
         "hasown",
-        "mime-types"
+        "mime-types@2.1.35"
       ]
     },
     "fs-extra@8.1.0": {
@@ -526,10 +531,19 @@
     "mime-db@1.52.0": {
       "integrity": "sha512-sPU4uV7dYlvtWJxwwxHD0PuihVNiE7TyAbQ5SWxDCB9mUYvOgroQOwYQQOKPJ8CIbE+1ETVlOoK1UC2nU3gYvg=="
     },
+    "mime-db@1.54.0": {
+      "integrity": "sha512-aU5EJuIN2WDemCcAp2vFBfp/m4EAhWJnUNSSw0ixs7/kXbd6Pg64EmwJkNdFhB8aWt1sH2CTXrLxo/iAGV3oPQ=="
+    },
     "mime-types@2.1.35": {
       "integrity": "sha512-ZDY+bPm5zTTF+YpCrAU9nK0UgICYPT0QtT1NZWFv4s++TNkcgVaT0g6+4R2uI4MjQjzysHB1zxuWL50hzaeXiw==",
       "dependencies": [
-        "mime-db"
+        "mime-db@1.52.0"
+      ]
+    },
+    "mime-types@3.0.1": {
+      "integrity": "sha512-xRc4oEhT6eaBpU1XF7AjpOFD+xQmXNB5OVKwp4tqCuBpHLS/ZbBDrc07mYTDqVMg6PfxUjjNp85O6Cd2Z/5HWA==",
+      "dependencies": [
+        "mime-db@1.54.0"
       ]
     },
     "mimic-fn@1.2.0": {
@@ -691,7 +705,7 @@
         "is-typedarray",
         "isstream",
         "json-stringify-safe",
-        "mime-types",
+        "mime-types@2.1.35",
         "oauth-sign",
         "performance-now",
         "qs",
@@ -927,8 +941,10 @@
   "workspace": {
     "dependencies": [
       "jsr:@std/assert@1",
+      "npm:@types/mime-types@3.0.1",
       "npm:adm-zip@0.5.16",
       "npm:jszip@3.10.1",
+      "npm:mime-types@3.0.1",
       "npm:windows-build-tools@5.2.2",
       "npm:zod@3.25.74"
     ]

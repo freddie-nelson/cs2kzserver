@@ -1,6 +1,6 @@
 import { z } from "zod/v4";
 
-import { CS2_DIR, METAMOD_DOWNLOAD_URL, PLUGINS_CONFIG_PATH } from "./env.ts";
+import { CS2_DIR, METAMOD_DOWNLOAD_URL, PLUGINS_CONFIG_PATH, PREVIOUS_METAMOD_DOWNLOAD_URL } from "./env.ts";
 import { join } from "node:path";
 import { exists } from "jsr:@std/fs/exists";
 import JSZip from "jszip";
@@ -29,6 +29,7 @@ export const pluginSchema = z.object({
       })
     )
     .default(() => []),
+  lastInstalledUrl: z.string().optional(),
 });
 
 export const pluginsSchema = z.array(pluginSchema).refine((plugins) => {
@@ -95,6 +96,20 @@ export const pluginDirs = {
 
 export const pluginDirNameSchema = z.enum(Object.keys(pluginDirs) as [keyof typeof pluginDirs]);
 export type PluginDirName = z.infer<typeof pluginDirNameSchema>;
+
+export async function updatePluginsConfig() {
+  await Deno.writeTextFile(
+    PLUGINS_CONFIG_PATH,
+    JSON.stringify(
+      plugins.map((p) => ({
+        ...p,
+        dependencies: Array.from(p.dependencies),
+      })),
+      null,
+      2
+    )
+  );
+}
 
 export function getPluginsOrderedByDependencies(): Plugins {
   const orderedPlugins: Plugins = [];
@@ -200,12 +215,17 @@ export async function installPluginConfigs(plugin: Plugin) {
  * @returns A promise that resolves to true if the plugin was installed, false if it was already installed.
  */
 export async function installPlugin(plugin: Plugin): Promise<boolean> {
-  if (await isPluginInstalled(plugin)) {
+  const isInstalled = await isPluginInstalled(plugin);
+  if (isInstalled && plugin.lastInstalledUrl === plugin.downloadUrl) {
     console.log(
       `${plugin.displayName} is already installed in the CS2 server directory, skipping installation...`
     );
-    installPluginConfigs(plugin);
+    await installPluginConfigs(plugin);
     return false;
+  }
+
+  if (isInstalled && plugin.name !== "metamod") {
+    await togglePlugin(plugin, true);
   }
 
   console.log(`Installing ${plugin.displayName}...`);
@@ -231,7 +251,10 @@ export async function installPlugin(plugin: Plugin): Promise<boolean> {
 
   console.log(`${plugin.displayName} installed successfully.`);
 
-  installPluginConfigs(plugin);
+  await installPluginConfigs(plugin);
+
+  plugin.lastInstalledUrl = plugin.downloadUrl;
+  await updatePluginsConfig();
 
   return true;
 }
@@ -246,6 +269,7 @@ export async function installMetamod() {
     description: "",
     type: "metamod",
     downloadUrl: METAMOD_DOWNLOAD_URL,
+    lastInstalledUrl: PREVIOUS_METAMOD_DOWNLOAD_URL,
     targetExtractDir: "@csgo",
     enabled: true,
     isCounterStrikeSharpSharedPlugin: false,
