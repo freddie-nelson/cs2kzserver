@@ -10,40 +10,69 @@ import {
 } from "./env.ts";
 import { downloadSteamCMD, runSteamCMD } from "./steamCMD.ts";
 import { cleanDirs } from "./path.ts";
+import { ChildProcess, spawn, StdioOptions } from "node:child_process";
 
+export enum Cs2ServerStatus {
+  INSTALLING,
+  UPDATING,
+  STARTING,
+  RUNNING,
+  STOPPED,
+}
+
+let isUpdating = false;
 export async function updateCs2Server(
   startMessage: string = "Updating CS2 server...",
   successMessage: string = "CS2 server updated successfully.",
   errorMessage: string = "CS2 server update failed. The executable was not found."
 ) {
-  console.log(startMessage);
+  if (isUpdating) {
+    throw new Error("CS2 server update is already in progress.");
+  }
+  isUpdating = true;
 
-  const { steamCmdExecutable } = await downloadSteamCMD(STEAMCMD_DOWNLOAD_URL, STEAMCMD_DIR);
-  const installServerProcess = runSteamCMD(steamCmdExecutable, [
-    "+force_install_dir",
-    KZSERVER_DIR,
-    "+login",
-    "anonymous",
-    "+app_update",
-    "730",
-    "+validate",
-  ]);
-  await installServerProcess.output();
+  try {
+    console.log(startMessage);
 
-  if (await exists(CS2_EXECUTABLE_PATH)) {
-    console.log(successMessage);
-  } else {
-    throw new Error(errorMessage);
+    const { steamCmdExecutable } = await downloadSteamCMD(STEAMCMD_DOWNLOAD_URL, STEAMCMD_DIR);
+    const installServerProcess = runSteamCMD(steamCmdExecutable, [
+      "+force_install_dir",
+      KZSERVER_DIR,
+      "+login",
+      "anonymous",
+      "+app_update",
+      "730",
+      "+validate",
+    ]);
+    await installServerProcess.output();
+
+    if (await exists(CS2_EXECUTABLE_PATH)) {
+      console.log(successMessage);
+    } else {
+      throw new Error(errorMessage);
+    }
+  } finally {
+    isUpdating = false;
   }
 }
 
+let isInstalling = false;
 export async function installCs2Server() {
-  await cleanDirs();
-  await updateCs2Server(
-    "Installing CS2 server...",
-    "CS2 server installed successfully.",
-    "CS2 server installation failed. The executable was not found."
-  );
+  if (isInstalling) {
+    throw new Error("CS2 server installation is already in progress.");
+  }
+  isInstalling = true;
+
+  try {
+    await cleanDirs();
+    await updateCs2Server(
+      "Installing CS2 server...",
+      "CS2 server installed successfully.",
+      "CS2 server installation failed. The executable was not found."
+    );
+  } finally {
+    isInstalling = false;
+  }
 }
 
 export async function updateOrInstallCs2Server() {
@@ -61,36 +90,83 @@ export async function updateOrInstallCs2Server() {
   }
 }
 
-export async function startCs2Server(output: "piped" | "inherit" | "null" = "inherit") {
+let cs2ServerProcess: ChildProcess | null = null;
+let isStarting = false;
+export async function startCs2Server(output: StdioOptions = "inherit") {
   if (!(await exists(CS2_EXECUTABLE_PATH))) {
     throw new Error("CS2 server executable not found. Please ensure CS2 server is installed correctly.");
   }
+  isStarting = true;
 
-  console.log("Starting CS2 server...");
+  try {
+    if (cs2ServerProcess) {
+      console.log("CS2 server is already running. Stopping the existing server before starting a new one.");
+      cs2ServerProcess.kill("SIGKILL");
+      cs2ServerProcess = null;
+    }
 
-  const command = new Deno.Command(CS2_EXECUTABLE_PATH, {
-    args: [
-      "-dedicated",
-      "+map",
-      "de_dust2",
-      "+sv_setsteamaccount",
-      STEAM_GSLT_TOKEN,
-      "+hostport",
-      SERVER_PORT.toString(),
-      "+host_workshop_map",
-      "3121168339",
-    ],
-    stdout: output,
-    stderr: output,
-  });
+    console.log("Starting CS2 server...");
 
-  const process = command.spawn();
-  if (!process.pid) {
-    throw new Error("Failed to start CS2 server. The process did not start correctly.");
+    const process = spawn(
+      CS2_EXECUTABLE_PATH,
+      [
+        "-dedicated",
+        "+map",
+        "de_dust2",
+        "+sv_setsteamaccount",
+        STEAM_GSLT_TOKEN,
+        "+hostport",
+        SERVER_PORT.toString(),
+        "+host_workshop_map",
+        "3121168339",
+      ],
+      {
+        stdio: output,
+      }
+    );
+    if (!process.pid) {
+      throw new Error("Failed to start CS2 server. The process did not start correctly.");
+    }
+
+    process.on("exit", () => (cs2ServerProcess = null));
+
+    console.log(`CS2 server started on localhost:${SERVER_PORT}.`);
+    console.log("You can now connect to the server in game.");
+
+    return (cs2ServerProcess = process);
+  } finally {
+    isStarting = false;
+  }
+}
+
+export function stopCs2Server() {
+  if (!cs2ServerProcess) {
+    console.log("CS2 server is not running.");
+    return;
   }
 
-  console.log(`CS2 server started on localhost:${SERVER_PORT}.`);
-  console.log("You can now connect to the server in game.");
+  console.log("Stopping CS2 server...");
+  cs2ServerProcess.kill("SIGKILL");
+  cs2ServerProcess = null;
+  console.log("CS2 server stopped successfully.");
+}
 
-  return process;
+export function getCs2ServerStatus() {
+  if (isInstalling) {
+    return Cs2ServerStatus.INSTALLING;
+  }
+
+  if (isUpdating) {
+    return Cs2ServerStatus.UPDATING;
+  }
+
+  if (isStarting) {
+    return Cs2ServerStatus.STARTING;
+  }
+
+  if (!cs2ServerProcess) {
+    return Cs2ServerStatus.STOPPED;
+  }
+
+  return Cs2ServerStatus.RUNNING;
 }

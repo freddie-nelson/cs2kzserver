@@ -6,7 +6,7 @@ import {
   pluginsMap,
   togglePlugin,
 } from "./plugins.ts";
-import { startCs2Server, updateOrInstallCs2Server } from "./cs2server.ts";
+import { updateOrInstallCs2Server } from "./cs2server.ts";
 import { startClient } from "./client.ts";
 
 async function main() {
@@ -29,7 +29,6 @@ async function main() {
     }
   }
 
-  await startCs2Server();
   await startClient();
 }
 

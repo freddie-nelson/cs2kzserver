@@ -97,18 +97,17 @@ export const pluginDirs = {
 export const pluginDirNameSchema = z.enum(Object.keys(pluginDirs) as [keyof typeof pluginDirs]);
 export type PluginDirName = z.infer<typeof pluginDirNameSchema>;
 
+export function formatPluginForJson(
+  plugin: Plugin
+): Omit<Plugin, "dependencies"> & { dependencies: string[] } {
+  return {
+    ...plugin,
+    dependencies: Array.from(plugin.dependencies),
+  };
+}
+
 export async function updatePluginsConfig() {
-  await Deno.writeTextFile(
-    PLUGINS_CONFIG_PATH,
-    JSON.stringify(
-      plugins.map((p) => ({
-        ...p,
-        dependencies: Array.from(p.dependencies),
-      })),
-      null,
-      2
-    )
-  );
+  await Deno.writeTextFile(PLUGINS_CONFIG_PATH, JSON.stringify(plugins.map(formatPluginForJson), null, 2));
 }
 
 export function getPluginsOrderedByDependencies(): Plugins {
