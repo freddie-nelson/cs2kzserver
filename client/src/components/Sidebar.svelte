@@ -1,4 +1,6 @@
 <script lang="ts">
+  import StartStopButton from "./StartStopButton.svelte";
+
 </script>
 
 <aside>
@@ -10,6 +12,8 @@
             <li><a href="/settings">Settings</a></li>
         </ul>
     </nav>
+
+    <StartStopButton />
 </aside>
 
 <style>

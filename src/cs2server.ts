@@ -11,13 +11,22 @@ import {
 import { downloadSteamCMD, runSteamCMD } from "./steamCMD.ts";
 import { cleanDirs } from "./path.ts";
 import { ChildProcess, spawn, StdioOptions } from "node:child_process";
+import {
+  checkDependenciesAreEnabled,
+  getPluginsOrderedByDependencies,
+  installMetamod,
+  installPlugin,
+  pluginsMap,
+  togglePlugin,
+} from "./plugins.ts";
 
 export enum Cs2ServerStatus {
-  INSTALLING,
-  UPDATING,
-  STARTING,
-  RUNNING,
-  STOPPED,
+  INSTALLING = "INSTALLING",
+  UPDATING = "UPDATING",
+  STARTING = "STARTING",
+  RUNNING = "RUNNING",
+  STOPPED = "STOPPED",
+  UPDATING_PLUGINS = "UPDATING_PLUGINS",
 }
 
 let isUpdating = false;
@@ -90,6 +99,35 @@ export async function updateOrInstallCs2Server() {
   }
 }
 
+let isInstallingPlugins = false;
+export async function updateOrInstallPlugins() {
+  if (isInstallingPlugins) {
+    throw new Error("Plugins installation is already in progress.");
+  }
+  isInstallingPlugins = true;
+
+  try {
+    await installMetamod();
+
+    for (const plugin of getPluginsOrderedByDependencies()) {
+      await installPlugin(plugin);
+      await togglePlugin(plugin, plugin.enabled);
+
+      if (plugin.enabled && !checkDependenciesAreEnabled(plugin)) {
+        throw new Error(
+          `Plugin ${
+            plugin.displayName
+          } is enabled but its dependencies are not met. Please enable [${Array.from(plugin.dependencies)
+            .filter((dep) => !pluginsMap.get(dep)?.enabled)
+            .join(", ")}] to use ${plugin.displayName}.`
+        );
+      }
+    }
+  } finally {
+    isInstallingPlugins = false;
+  }
+}
+
 let cs2ServerProcess: ChildProcess | null = null;
 let isStarting = false;
 export async function startCs2Server(output: StdioOptions = "inherit") {
@@ -158,6 +196,10 @@ export function getCs2ServerStatus() {
 
   if (isUpdating) {
     return Cs2ServerStatus.UPDATING;
+  }
+
+  if (isInstallingPlugins) {
+    return Cs2ServerStatus.UPDATING_PLUGINS;
   }
 
   if (isStarting) {
