@@ -11,7 +11,7 @@ export const pluginSchema = z.object({
   displayName: z.string(),
   name: z.string(),
   description: z.string(),
-  type: z.enum(["metamod", "counterstrikesharp"]),
+  type: z.enum(["metamod", "counterstrikesharp", "configonly"]),
   downloadUrl: z.string(),
   targetExtractDir: z.string().default("@csgo"),
   dirInZipToExtract: z.string().optional(),
@@ -214,6 +214,11 @@ export async function installPluginConfigs(plugin: Plugin) {
  * @returns A promise that resolves to true if the plugin was installed, false if it was already installed.
  */
 export async function installPlugin(plugin: Plugin): Promise<boolean> {
+  if (plugin.type === "configonly") {
+    await installPluginConfigs(plugin);
+    return false;
+  }
+
   const isInstalled = await isPluginInstalled(plugin);
   if (isInstalled && plugin.lastInstalledUrl === plugin.downloadUrl) {
     console.log(
