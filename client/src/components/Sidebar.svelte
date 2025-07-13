@@ -1,4 +1,5 @@
 <script lang="ts">
+  import { Link } from "svelte5-router";
   import StartStopButton from "./StartStopButton.svelte";
 
 </script>
@@ -7,9 +8,11 @@
     <h1>CS2 Server Manager</h1>
     <nav>
         <ul>
-            <li><a href="/dashboard">Dashboard</a></li>
-            <li><a href="/plugins">Plugins</a></li>
-            <li><a href="/settings">Settings</a></li>
+            <li><Link class="sidebar__link" to="/">Dashboard</Link></li>
+            <li><Link class="sidebar__link" to="/logs">Logs</Link></li>
+            <li><Link class="sidebar__link" to="/console">Console</Link></li>
+            <li><Link class="sidebar__link" to="/plugins">Plugins</Link></li>
+            <li><Link class="sidebar__link" to="/configs">Configs</Link></li>
         </ul>
     </nav>
 
@@ -37,9 +40,12 @@
         padding: 0;
         text-align: center;
         font-size: 1.1rem;
+        display: flex;
+        flex-direction: column;
+        gap: 0.5rem;
     }
 
-    li a {
+    :global(.sidebar__link) {
         display: block;
         width: 100%;
         padding: 1rem 0;
@@ -47,10 +53,15 @@
         transition: all 0.3s ease;
         text-decoration: none;
         border-radius: 0.5rem;
-    }
 
-    li a:hover {
-        color: var(--color-text);
-        background-color: var(--color-bg-light);
+        &:hover {
+            color: var(--color-text);
+            background-color: var(--color-bg-light);
+        }
+
+        &[aria-current="page"] {
+            color: var(--color-bg-light);
+            background-color: var(--color-text);
+        }
     }
 </style>

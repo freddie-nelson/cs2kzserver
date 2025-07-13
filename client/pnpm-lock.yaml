@@ -20,6 +20,9 @@ importers:
       svelte-check:
         specifier: ^4.2.2
         version: 4.2.2(picomatch@4.0.2)(svelte@5.35.5)(typescript@5.8.3)
+      svelte5-router:
+        specifier: ^3.0.2
+        version: 3.0.2(svelte@5.35.5)
       typescript:
         specifier: ~5.8.3
         version: 5.8.3
@@ -447,6 +450,11 @@ packages:
       svelte: ^4.0.0 || ^5.0.0-next.0
       typescript: '>=5.0.0'
 
+  svelte5-router@3.0.2:
+    resolution: {integrity: sha512-3XE97eEVrV2OY/7iuhrBIvD48KWmD9M8Cf2mZqjoxnI9bR5ZiwtAg9ObGP3kP7Z/kyVrn0n8riNBJdHeddctlQ==}
+    peerDependencies:
+      svelte: ^5.0.0
+
   svelte@5.35.5:
     resolution: {integrity: sha512-KuRvI82rhh0RMz1EKsUJD96gZyHJ+h2+8zrwO8iqE/p/CmcNKvIItDUAeUePhuCDgtegDJmF8IKThbHIfmTgTA==}
     engines: {node: '>=18'}
@@ -833,6 +841,10 @@ snapshots:
       typescript: 5.8.3
     transitivePeerDependencies:
       - picomatch
+
+  svelte5-router@3.0.2(svelte@5.35.5):
+    dependencies:
+      svelte: 5.35.5
 
   svelte@5.35.5:
     dependencies:
