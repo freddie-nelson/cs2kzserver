@@ -3,6 +3,11 @@ import {
   CS2_DIR,
   CS2_EXECUTABLE_PATH,
   KZSERVER_DIR,
+  SERVER_CHEATS_ENABLED,
+  SERVER_LAN_ONLY,
+  SERVER_MAX_PLAYERS,
+  SERVER_NETCON_PASSWORD,
+  SERVER_NETCON_PORT,
   SERVER_PORT,
   STEAM_GSLT_TOKEN,
   STEAMCMD_DIR,
@@ -19,6 +24,7 @@ import {
   pluginsMap,
   togglePlugin,
 } from "./plugins.ts";
+import { convertExeToConsoleOrWindowMode } from "./exe.ts";
 
 export enum Cs2ServerStatus {
   INSTALLING = "INSTALLING",
@@ -54,6 +60,10 @@ export async function updateCs2Server(
       "+validate",
     ]);
     await installServerProcess.output();
+
+    const modifiedExecutablePath = CS2_EXECUTABLE_PATH + ".modified";
+    convertExeToConsoleOrWindowMode(CS2_EXECUTABLE_PATH, modifiedExecutablePath, "to_console");
+    await Deno.rename(modifiedExecutablePath, CS2_EXECUTABLE_PATH);
 
     if (await exists(CS2_EXECUTABLE_PATH)) {
       console.log(successMessage);
@@ -149,8 +159,21 @@ export async function startCs2Server(output: StdioOptions = "inherit") {
       CS2_EXECUTABLE_PATH,
       [
         "-dedicated",
-        "+map",
-        "de_dust2",
+        "-console",
+        "-noshaderapi",
+        "-usercon",
+        "-netconport",
+        SERVER_NETCON_PORT.toString(),
+        "-netconpassword",
+        SERVER_NETCON_PASSWORD,
+        "-toconsole",
+        "-maxplayers_override",
+        SERVER_MAX_PLAYERS.toString(),
+        "-nohltv",
+        "+sv_lan",
+        SERVER_LAN_ONLY ? "1" : "0",
+        "+sv_cheats",
+        SERVER_CHEATS_ENABLED ? "1" : "0",
         "+sv_setsteamaccount",
         STEAM_GSLT_TOKEN,
         "+hostport",

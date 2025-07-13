@@ -97,9 +97,9 @@
   {
     "displayName": "Weapon Paints",
     "name": "WeaponPaints",
-    "description": "A simple skin changer plugin for CS2. Allows you to change knife, glove, weapon and agent skins.",
+    "description": "A simple skin changer plugin for CS2. Allows you to change knife, glove, weapon and agent skins. Requires FollowCS2ServerGuidelines to be false in cssharp core config.",
     "type": "counterstrikesharp",
-    "downloadUrl": "https://github.com/freddie-nelson/cs2-WeaponPaints/releases/download/build-1/WeaponPaints.zip",
+    "downloadUrl": "https://github.com/freddie-nelson/cs2-WeaponPaints/releases/download/build-3/WeaponPaints.zip",
     "targetExtractDir": "@cssharpplugins",
     "enabled": true,
     "isCounterStrikeSharpSharedPlugin": false,
@@ -117,7 +117,7 @@
         "config": "@cssharp/plugins/gamedata/weaponpaints.json"
       }
     ],
-    "lastInstalledUrl": "https://github.com/freddie-nelson/cs2-WeaponPaints/releases/download/build-1/WeaponPaints.zip"
+    "lastInstalledUrl": "https://github.com/freddie-nelson/cs2-WeaponPaints/releases/download/build-3/WeaponPaints.zip"
   },
   {
     "displayName": "Map Chooser",
