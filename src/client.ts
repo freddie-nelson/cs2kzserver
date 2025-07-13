@@ -2,8 +2,37 @@ import { exists } from "jsr:@std/fs/exists";
 import { CLIENT_DIR, CLIENT_PORT } from "./env.ts";
 import { format, join } from "node:path";
 import { lookup } from "mime-types";
-import { Cs2ServerStatus, getCs2ServerStatus, startCs2Server, stopCs2Server } from "./cs2server.ts";
+import {
+  Cs2ServerStatus,
+  endRconSession,
+  executeRconCommand,
+  getCs2ServerStatus,
+  getServerLogs,
+  startCs2Server,
+  startRconSession,
+  stopCs2Server,
+} from "./cs2server.ts";
 import { formatPluginForJson, plugins, pluginSchema, updatePluginsConfig } from "./plugins.ts";
+import { getAllConfigNames, getRawConfig, saveRawConfig } from "./configs.ts";
+import { z } from "zod/v4";
+
+const getConfigSchema = z.object({
+  name: z.string(),
+});
+
+const saveConfigSchema = z.object({
+  name: z.string(),
+  config: z.string(),
+});
+
+const executeRconCommandSchema = z.object({
+  sessionId: z.string(),
+  command: z.string(),
+});
+
+const endRconSessionSchema = z.object({
+  sessionId: z.string(),
+});
 
 function apiResponse(status: number, data: any): Response {
   return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -84,6 +113,80 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
     await updatePluginsConfig();
 
     return apiResponse(200, { plugins: plugins.map(formatPluginForJson) });
+  },
+  "/getConfigNames": async (_: Request) => {
+    const configNames = await getAllConfigNames();
+    return apiResponse(200, { configNames });
+  },
+  "/getConfig": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await getConfigSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const { name } = data;
+    const configs = await getAllConfigNames();
+    if (!configs.includes(name)) {
+      return apiResponse(404, { error: "Config not found" });
+    }
+
+    const config = await getRawConfig(name);
+    return apiResponse(200, { config });
+  },
+  "/saveConfig": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await saveConfigSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const { name, config } = data;
+    const configs = await getAllConfigNames();
+    if (!configs.includes(name)) {
+      return apiResponse(404, { error: "Config not found" });
+    }
+
+    await saveRawConfig(name, config);
+    return apiResponse(200, { message: "Config saved successfully." });
+  },
+  "/startRconSession": async () => {
+    const sessionId = await startRconSession();
+    return apiResponse(200, { sessionId });
+  },
+  "/executeRconCommand": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await executeRconCommandSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const { sessionId, command } = data;
+    try {
+      const response = await executeRconCommand(sessionId, command);
+      return apiResponse(200, { response });
+    } catch (error) {
+      return apiResponse(500, { error: String(error) });
+    }
+  },
+  "/endRconSession": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await endRconSessionSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const { sessionId } = data;
+    try {
+      await endRconSession(sessionId);
+      return apiResponse(200, { message: "RCON session ended successfully." });
+    } catch (error) {
+      return apiResponse(500, { error: String(error) });
+    }
+  },
+  "/getServerLogs": async (_: Request) => {
+    const logs = getServerLogs();
+    return apiResponse(200, { logs });
   },
 };
 

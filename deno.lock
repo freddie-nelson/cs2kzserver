@@ -14,6 +14,7 @@
     "npm:bufferpack@0.0.6": "0.0.6",
     "npm:jszip@3.10.1": "3.10.1",
     "npm:mime-types@3.0.1": "3.0.1",
+    "npm:rcon-client@4.2.5": "4.2.5",
     "npm:steamcmd-interface@5.0.0": "5.0.0",
     "npm:windows-build-tools@5.2.2": "5.2.2",
     "npm:zod@3.25.74": "3.25.74"
@@ -673,6 +674,12 @@
     "qs@6.5.3": {
       "integrity": "sha512-qxXIEh4pCGfHICj1mAJQ2/2XVZkjCDTcEgfoSQxc/fYivUZxTkk7L3bDBJSoNrEzXI17oUO5Dp07ktqE5KzczA=="
     },
+    "rcon-client@4.2.5": {
+      "integrity": "sha512-AnX1GU/ZTlwtYup3H6h0J1hwfP3OYltXVe+8ReBzmNEepX3xGH8nDg7gYqT5Y9rpAS/LmQ48h0BKINt1YGd8bA==",
+      "dependencies": [
+        "typed-emitter"
+      ]
+    },
     "readable-stream@1.1.14": {
       "integrity": "sha512-+MeVjFf4L44XUkhM1eYbD8fyEsxcV81pqMSR5gblfcLCHfZvbrqy4/qYHE+/R5HoBUT11WV5O08Cr1n3YXkWVQ==",
       "dependencies": [
@@ -874,6 +881,9 @@
     "tweetnacl@0.14.5": {
       "integrity": "sha512-KXXFFdAbFXY4geFIwoyNK+f5Z1b7swfXABfL7HXCmoIWMKU3dmS26672A4EeQtDzLKy7SXmfBu51JolvEKwtGA=="
     },
+    "typed-emitter@0.1.0": {
+      "integrity": "sha512-Tfay0l6gJMP5rkil8CzGbLthukn+9BN/VXWcABVFPjOoelJ+koW8BuPZYk+h/L+lEeIp1fSzVRiWRPIjKVjPdg=="
+    },
     "uint8array-extras@1.4.0": {
       "integrity": "sha512-ZPtzy0hu4cZjv3z5NW9gfKnNLjoz4y6uv4HlelAjDK7sY/xOkKZv9xK/WQpcsBB3jEybChz9DPC2U/+cusjJVQ=="
     },
@@ -950,6 +960,7 @@
       "npm:bufferpack@0.0.6",
       "npm:jszip@3.10.1",
       "npm:mime-types@3.0.1",
+      "npm:rcon-client@4.2.5",
       "npm:windows-build-tools@5.2.2",
       "npm:zod@3.25.74"
     ]

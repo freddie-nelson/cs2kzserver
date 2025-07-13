@@ -1,18 +1,5 @@
 import { exists } from "jsr:@std/fs/exists";
-import {
-  CS2_DIR,
-  CS2_EXECUTABLE_PATH,
-  KZSERVER_DIR,
-  SERVER_CHEATS_ENABLED,
-  SERVER_LAN_ONLY,
-  SERVER_MAX_PLAYERS,
-  SERVER_NETCON_PASSWORD,
-  SERVER_NETCON_PORT,
-  SERVER_PORT,
-  STEAM_GSLT_TOKEN,
-  STEAMCMD_DIR,
-  STEAMCMD_DOWNLOAD_URL,
-} from "./env.ts";
+import { CS2_DIR, CS2_EXECUTABLE_PATH, SERVER_DIR, STEAMCMD_DIR, STEAMCMD_DOWNLOAD_URL } from "./env.ts";
 import { downloadSteamCMD, runSteamCMD } from "./steamCMD.ts";
 import { cleanDirs } from "./path.ts";
 import { ChildProcess, spawn, StdioOptions } from "node:child_process";
@@ -25,6 +12,9 @@ import {
   togglePlugin,
 } from "./plugins.ts";
 import { convertExeToConsoleOrWindowMode } from "./exe.ts";
+import { getServerConfig } from "./configs.ts";
+import { Rcon } from "rcon-client";
+import { randomUUID } from "node:crypto";
 
 export enum Cs2ServerStatus {
   INSTALLING = "INSTALLING",
@@ -33,6 +23,12 @@ export enum Cs2ServerStatus {
   RUNNING = "RUNNING",
   STOPPED = "STOPPED",
   UPDATING_PLUGINS = "UPDATING_PLUGINS",
+}
+
+export interface ServerLog {
+  timestamp: string;
+  message: string;
+  type: "log" | "error";
 }
 
 let isUpdating = false;
@@ -52,7 +48,7 @@ export async function updateCs2Server(
     const { steamCmdExecutable } = await downloadSteamCMD(STEAMCMD_DOWNLOAD_URL, STEAMCMD_DIR);
     const installServerProcess = runSteamCMD(steamCmdExecutable, [
       "+force_install_dir",
-      KZSERVER_DIR,
+      SERVER_DIR,
       "+login",
       "anonymous",
       "+app_update",
@@ -139,21 +135,25 @@ export async function updateOrInstallPlugins() {
 }
 
 let cs2ServerProcess: ChildProcess | null = null;
+let serverLogs: ServerLog[] = [];
 let isStarting = false;
-export async function startCs2Server(output: StdioOptions = "inherit") {
+export async function startCs2Server() {
   if (!(await exists(CS2_EXECUTABLE_PATH))) {
     throw new Error("CS2 server executable not found. Please ensure CS2 server is installed correctly.");
   }
   isStarting = true;
 
+  const config = await getServerConfig();
+
   try {
     if (cs2ServerProcess) {
       console.log("CS2 server is already running. Stopping the existing server before starting a new one.");
-      cs2ServerProcess.kill("SIGKILL");
-      cs2ServerProcess = null;
+      await stopCs2Server();
     }
 
     console.log("Starting CS2 server...");
+
+    serverLogs = [];
 
     const process = spawn(
       CS2_EXECUTABLE_PATH,
@@ -163,35 +163,57 @@ export async function startCs2Server(output: StdioOptions = "inherit") {
         "-noshaderapi",
         "-usercon",
         "-netconport",
-        SERVER_NETCON_PORT.toString(),
+        config.serverNetconPort.toString(),
         "-netconpassword",
-        SERVER_NETCON_PASSWORD,
+        config.serverNetconPassword,
         "-toconsole",
         "-maxplayers_override",
-        SERVER_MAX_PLAYERS.toString(),
+        config.serverMaxPlayers.toString(),
         "-nohltv",
         "+sv_lan",
-        SERVER_LAN_ONLY ? "1" : "0",
+        config.serverLanOnly ? "1" : "0",
         "+sv_cheats",
-        SERVER_CHEATS_ENABLED ? "1" : "0",
+        config.serverCheatsEnabled ? "1" : "0",
         "+sv_setsteamaccount",
-        STEAM_GSLT_TOKEN,
+        config.steamGsltToken,
         "+hostport",
-        SERVER_PORT.toString(),
+        config.serverPort.toString(),
         "+host_workshop_map",
         "3121168339",
       ],
       {
-        stdio: output,
+        stdio: "pipe",
       }
     );
     if (!process.pid) {
       throw new Error("Failed to start CS2 server. The process did not start correctly.");
     }
 
+    process.stdout.on("data", (data) => {
+      const log = data.toString().trim();
+      if (log) {
+        serverLogs.push(log);
+        console.log(log);
+      }
+    });
+
     process.on("exit", () => (cs2ServerProcess = null));
 
-    console.log(`CS2 server started on localhost:${SERVER_PORT}.`);
+    process.stderr.on("data", (data) => {
+      const errorLog = data.toString().trim();
+      if (errorLog) {
+        serverLogs.push({ timestamp: new Date().toISOString(), message: errorLog, type: "error" });
+      }
+    });
+
+    process.stdout.on("data", (data) => {
+      const log = data.toString().trim();
+      if (log) {
+        serverLogs.push({ timestamp: new Date().toISOString(), message: log, type: "log" });
+      }
+    });
+
+    console.log(`CS2 server started on localhost:${config.serverPort}.`);
     console.log("You can now connect to the server in game.");
 
     return (cs2ServerProcess = process);
@@ -200,11 +222,13 @@ export async function startCs2Server(output: StdioOptions = "inherit") {
   }
 }
 
-export function stopCs2Server() {
+export async function stopCs2Server() {
   if (!cs2ServerProcess) {
     console.log("CS2 server is not running.");
     return;
   }
+
+  await endAllRconSessions();
 
   console.log("Stopping CS2 server...");
   cs2ServerProcess.kill("SIGKILL");
@@ -234,4 +258,56 @@ export function getCs2ServerStatus() {
   }
 
   return Cs2ServerStatus.RUNNING;
+}
+
+const rconSessions = new Map<string, Rcon>();
+
+export async function startRconSession() {
+  const id = randomUUID();
+  const config = await getServerConfig();
+
+  const rcon = new Rcon({
+    host: "localhost",
+    port: config.serverNetconPort,
+    password: config.serverNetconPassword,
+  });
+  await rcon.connect();
+  rconSessions.set(id, rcon);
+
+  return id;
+}
+
+export async function executeRconCommand(sessionId: string, command: string) {
+  const rcon = rconSessions.get(sessionId);
+  if (!rcon) {
+    throw new Error(`RCON session with ID ${sessionId} does not exist.`);
+  }
+
+  try {
+    const response = await rcon.send(command);
+    return response;
+  } catch (error) {
+    throw new Error(`Failed to execute RCON command: ${error}`);
+  }
+}
+
+export async function endRconSession(sessionId: string) {
+  const rcon = rconSessions.get(sessionId);
+  if (!rcon) {
+    throw new Error(`RCON session with ID ${sessionId} does not exist.`);
+  }
+
+  await rcon.end();
+  rconSessions.delete(sessionId);
+}
+
+export async function endAllRconSessions() {
+  for (const [id, rcon] of rconSessions) {
+    await rcon.end();
+    rconSessions.delete(id);
+  }
+}
+
+export function getServerLogs() {
+  return serverLogs;
 }

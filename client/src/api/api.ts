@@ -30,6 +30,12 @@ export interface Plugin {
   lastInstalledUrl?: string;
 }
 
+export interface ServerLog {
+  timestamp: string;
+  message: string;
+  type: "log" | "error";
+}
+
 async function request<Req, Res>(endpoint: string, body?: Req): Promise<Res> {
   const response = await fetch(`${apiUrl}${endpoint}`, {
     method: "POST",
@@ -72,4 +78,35 @@ export function updatePlugin(plugin: Plugin) {
 
 export function deletePlugin(pluginName: string) {
   return request<{ pluginName: string }, { plugins: Plugin[] }>("/removePlugin", { pluginName });
+}
+
+export function getConfigNames() {
+  return request<undefined, { names: string[] }>("/getConfigNames");
+}
+
+export function getConfig(name: string) {
+  return request<{ name: string }, { config: string }>("/getConfig", { name });
+}
+
+export function saveConfig(name: string, config: string) {
+  return request<{ name: string; config: string }, { message: string }>("/saveConfig", { name, config });
+}
+
+export function startRconSession() {
+  return request<undefined, { sessionId: string }>("/startRconSession");
+}
+
+export function executeRconCommand(sessionId: string, command: string) {
+  return request<{ sessionId: string; command: string }, { response: string }>("/executeRconCommand", {
+    sessionId,
+    command,
+  });
+}
+
+export function endRconSession(sessionId: string) {
+  return request<{ sessionId: string }, { message: string }>("/endRconSession", { sessionId });
+}
+
+export function getServerLogs() {
+  return request<undefined, { logs: ServerLog[] }>("/getServerLogs");
 }

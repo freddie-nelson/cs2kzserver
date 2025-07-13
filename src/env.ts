@@ -33,20 +33,14 @@ function getEnvBoolVar(name: string): boolean {
   }
 }
 
-export const KZSERVER_DIR = getEnvPathVar("KZSERVER_DIR");
+export const SERVER_DIR = getEnvPathVar("SERVER_DIR");
 export const STEAMCMD_DIR = getEnvPathVar("STEAMCMD_DIR");
 export const PLUGINS_CONFIG_PATH = getEnvPathVar("PLUGINS_CONFIG_PATH");
 export const STEAMCMD_DOWNLOAD_URL = getEnvVar("STEAMCMD_DOWNLOAD_URL");
-export const STEAM_GSLT_TOKEN = getEnvVar("STEAM_GSLT_TOKEN");
 export const METAMOD_DOWNLOAD_URL = getEnvVar("METAMOD_DOWNLOAD_URL");
 export const PREVIOUS_METAMOD_DOWNLOAD_URL = getEnvVar("PREVIOUS_METAMOD_DOWNLOAD_URL");
-export const CS2_DIR = join(KZSERVER_DIR, "game");
+export const CS2_DIR = join(SERVER_DIR, "game");
 export const CS2_EXECUTABLE_PATH = join(CS2_DIR, "./bin/win64/cs2.exe");
-export const SERVER_PORT = getEnvIntVar("SERVER_PORT");
 export const CLIENT_DIR = getEnvPathVar("CLIENT_DIR");
 export const CLIENT_PORT = getEnvIntVar("CLIENT_PORT");
-export const SERVER_LAN_ONLY = getEnvBoolVar("SERVER_LAN_ONLY");
-export const SERVER_CHEATS_ENABLED = getEnvBoolVar("SERVER_CHEATS_ENABLED");
-export const SERVER_NETCON_PORT = getEnvIntVar("SERVER_NETCON_PORT");
-export const SERVER_NETCON_PASSWORD = getEnvVar("SERVER_NETCON_PASSWORD");
-export const SERVER_MAX_PLAYERS = getEnvIntVar("SERVER_MAX_PLAYERS");
+export const CONFIG_DIR = getEnvPathVar("CONFIG_DIR");

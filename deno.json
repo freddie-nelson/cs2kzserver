@@ -13,6 +13,7 @@
     "bufferpack": "npm:bufferpack@0.0.6",
     "jszip": "npm:jszip@3.10.1",
     "mime-types": "npm:mime-types@3.0.1",
+    "rcon-client": "npm:rcon-client@4.2.5",
     "windows-build-tools": "npm:windows-build-tools@5.2.2",
     "zod": "npm:zod@3.25.74"
   }
