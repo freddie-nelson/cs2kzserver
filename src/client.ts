@@ -1,6 +1,6 @@
 import { exists } from "jsr:@std/fs/exists";
 import { CLIENT_DIR, CLIENT_PORT } from "./env.ts";
-import { format, join } from "node:path";
+import { join } from "node:path";
 import { lookup } from "mime-types";
 import {
   Cs2ServerStatus,
@@ -13,7 +13,7 @@ import {
   stopCs2Server,
 } from "./cs2server.ts";
 import { formatPluginForJson, plugins, pluginSchema, updatePluginsConfig } from "./plugins.ts";
-import { getAllConfigNames, getRawConfig, saveRawConfig } from "./configs.ts";
+import { getAllConfigNames, getRawConfig, getServerConfig, saveRawConfig } from "./configs.ts";
 import { z } from "zod/v4";
 
 const getConfigSchema = z.object({
@@ -187,6 +187,43 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
   "/getServerLogs": async (_: Request) => {
     const logs = getServerLogs();
     return apiResponse(200, { logs });
+  },
+  "/getDashboardData": async (_: Request) => {
+    const status = getCs2ServerStatus();
+    const serverConfig = await getServerConfig();
+    let connectedPlayers = 0;
+    let publicAddress = "";
+    let localAddress = "";
+
+    if (status === Cs2ServerStatus.RUNNING) {
+      const rcon = await startRconSession();
+      const res = await executeRconCommand(rcon, "status");
+
+      const playerMatch = res.match(/players\s+:\s+(\d+)/);
+      connectedPlayers = playerMatch ? parseInt(playerMatch[1], 10) : 0;
+
+      const ipMatch = res.match(
+        /udp\/ip\s+:\s+(\d+\.\d+\.\d+\.\d+):(\d+)\s+\(public\s+(\d+\.\d+\.\d+\.\d+):(\d+)\)/
+      );
+      if (ipMatch) {
+        const [, localIp, localPort, publicIpAddr, publicPortAddr] = ipMatch;
+        publicAddress = `${publicIpAddr}:${publicPortAddr}`;
+        localAddress = `${localIp}:${localPort}`;
+      }
+
+      await endRconSession(rcon);
+    }
+
+    return apiResponse(200, {
+      status,
+      plugins: plugins.map(formatPluginForJson),
+      configs: await getAllConfigNames(),
+      serverLogs: getServerLogs(),
+      serverConfig,
+      connectedPlayers,
+      publicAddress,
+      localAddress,
+    });
   },
 };
 

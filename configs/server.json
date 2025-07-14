@@ -1,9 +1,9 @@
 {
   "steamGsltToken": "537E452B20C4B87EF0BC234D36E3CECA",
+  "serverIp": "127.0.0.1",
   "serverPort": 27015,
   "serverLanOnly": false,
   "serverCheatsEnabled": false,
-  "serverNetconPort": 27016,
-  "serverNetconPassword": "password",
+  "serverRconPassword": "password",
   "serverMaxPlayers": 16
 }

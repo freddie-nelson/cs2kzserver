@@ -2,7 +2,7 @@ import { exists } from "jsr:@std/fs/exists";
 import { CS2_DIR, CS2_EXECUTABLE_PATH, SERVER_DIR, STEAMCMD_DIR, STEAMCMD_DOWNLOAD_URL } from "./env.ts";
 import { downloadSteamCMD, runSteamCMD } from "./steamCMD.ts";
 import { cleanDirs } from "./path.ts";
-import { ChildProcess, spawn, StdioOptions } from "node:child_process";
+import { ChildProcess, spawn } from "node:child_process";
 import {
   checkDependenciesAreEnabled,
   getPluginsOrderedByDependencies,
@@ -13,8 +13,8 @@ import {
 } from "./plugins.ts";
 import { convertExeToConsoleOrWindowMode } from "./exe.ts";
 import { getServerConfig } from "./configs.ts";
-import { Rcon } from "rcon-client";
 import { randomUUID } from "node:crypto";
+import { Rcon } from "rcon-client";
 
 export enum Cs2ServerStatus {
   INSTALLING = "INSTALLING",
@@ -159,17 +159,12 @@ export async function startCs2Server() {
       CS2_EXECUTABLE_PATH,
       [
         "-dedicated",
-        "-console",
-        "-noshaderapi",
         "-usercon",
-        "-netconport",
-        config.serverNetconPort.toString(),
-        "-netconpassword",
-        config.serverNetconPassword,
-        "-toconsole",
         "-maxplayers_override",
         config.serverMaxPlayers.toString(),
         "-nohltv",
+        "+rcon_password",
+        config.serverRconPassword,
         "+sv_lan",
         config.serverLanOnly ? "1" : "0",
         "+sv_cheats",
@@ -178,40 +173,34 @@ export async function startCs2Server() {
         config.steamGsltToken,
         "+hostport",
         config.serverPort.toString(),
-        "+host_workshop_map",
-        "3121168339",
+        "+ip",
+        config.serverIp.toString(),
+        "+map",
+        "de_dust2",
       ],
       {
-        stdio: "pipe",
+        stdio: "inherit",
       }
     );
     if (!process.pid) {
       throw new Error("Failed to start CS2 server. The process did not start correctly.");
     }
 
-    process.stdout.on("data", (data) => {
-      const log = data.toString().trim();
-      if (log) {
-        serverLogs.push(log);
-        console.log(log);
-      }
-    });
-
     process.on("exit", () => (cs2ServerProcess = null));
 
-    process.stderr.on("data", (data) => {
-      const errorLog = data.toString().trim();
-      if (errorLog) {
-        serverLogs.push({ timestamp: new Date().toISOString(), message: errorLog, type: "error" });
-      }
-    });
+    // process.stderr.on("data", (data) => {
+    //   const errorLog = data.toString().trim();
+    //   if (errorLog) {
+    //     serverLogs.push({ timestamp: new Date().toISOString(), message: errorLog, type: "error" });
+    //   }
+    // });
 
-    process.stdout.on("data", (data) => {
-      const log = data.toString().trim();
-      if (log) {
-        serverLogs.push({ timestamp: new Date().toISOString(), message: log, type: "log" });
-      }
-    });
+    // process.stdout.on("data", (data) => {
+    //   const log = data.toString().trim();
+    //   if (log) {
+    //     serverLogs.push({ timestamp: new Date().toISOString(), message: log, type: "log" });
+    //   }
+    // });
 
     console.log(`CS2 server started on localhost:${config.serverPort}.`);
     console.log("You can now connect to the server in game.");
@@ -263,13 +252,17 @@ export function getCs2ServerStatus() {
 const rconSessions = new Map<string, Rcon>();
 
 export async function startRconSession() {
+  if (!cs2ServerProcess) {
+    throw new Error("CS2 server is not running. Please start the server before starting an RCON session.");
+  }
+
   const id = randomUUID();
   const config = await getServerConfig();
 
   const rcon = new Rcon({
-    host: "localhost",
-    port: config.serverNetconPort,
-    password: config.serverNetconPassword,
+    host: "127.0.0.1",
+    port: config.serverPort,
+    password: config.serverRconPassword,
   });
   await rcon.connect();
   rconSessions.set(id, rcon);

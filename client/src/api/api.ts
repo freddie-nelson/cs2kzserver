@@ -36,6 +36,27 @@ export interface ServerLog {
   type: "log" | "error";
 }
 
+export interface ServerConfig {
+  steamGsltToken: string;
+  serverPort: number;
+  serverLanOnly: boolean;
+  serverCheatsEnabled: boolean;
+  serverNetconPort: number;
+  serverNetconPassword: string;
+  serverMaxPlayers: number;
+}
+
+export interface DashboardData {
+  status: Cs2ServerStatus;
+  plugin: Plugin[];
+  serverConfig: ServerConfig;
+  serverLogs: ServerLog[];
+  configs: string[];
+  connectedPlayers: number;
+  localAddress: string;
+  publicAddress: string;
+}
+
 async function request<Req, Res>(endpoint: string, body?: Req): Promise<Res> {
   const response = await fetch(`${apiUrl}${endpoint}`, {
     method: "POST",
@@ -109,4 +130,8 @@ export function endRconSession(sessionId: string) {
 
 export function getServerLogs() {
   return request<undefined, { logs: ServerLog[] }>("/getServerLogs");
+}
+
+export function getDashboardData() {
+  return request<undefined, DashboardData>("/getDashboardData");
 }
