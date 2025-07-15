@@ -1,5 +1,6 @@
 <script lang="ts">
   import { endRconSession, executeRconCommand, startRconSession, type ServerLog } from "../api/api";
+  import { getConsoleCommands, type ConsoleCommand } from "../api/consoleCommands";
 
   const logs: ServerLog[] = $state([]);
   let sending = $state(false);
@@ -74,6 +75,13 @@
   const clear = async () => {
     logs.length = 0;
   };
+
+  let consoleCommands = $state<ConsoleCommand[]>([]);
+  $effect(() => {
+    getConsoleCommands().then((commands) => {
+      consoleCommands = commands;
+    });
+  });
 </script>
 
 <main>
