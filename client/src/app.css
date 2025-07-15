@@ -15,6 +15,7 @@
   --color-accent: #d83b01;
   --color-border: #ccc;
   --sidebar-width: 16rem;
+  --color-danger: #e81123;
 }
 
 @media (prefers-color-scheme: dark) {
@@ -28,6 +29,7 @@
     --color-secondary: #569cd6;
     --color-accent: #f44747;
     --color-border: #555;
+    --color-danger: #e81123;
   }
 }
 

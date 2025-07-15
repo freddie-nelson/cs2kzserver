@@ -30,7 +30,7 @@
     await clearServerLogs();
     logs.length = 0;
     clearing = false;
-  }
+  };
 </script>
 
 <main>
@@ -38,25 +38,24 @@
     <h1>Server Logs</h1>
 
     <div class="controls">
+      <label>
+        Refresh Interval (ms):
+        <input type="number" bind:value={refreshIntervalRaw} min="1000" />
+      </label>
 
-    <label>
-      Refresh Interval (ms):
-      <input type="number" bind:value={refreshIntervalRaw} min="1000" />
-    </label>
+      <button onclick={clear}>
+        {clearing ? "Clearing..." : "Clear Logs"}
+      </button>
 
-    <button onclick={clear}>
-      {clearing ? "Clearing..." : "Clear Logs"}
-    </button>
-
-    <button onclick={refresh}>
-      {refreshing ? "Refreshing..." : "Refresh Logs"}
-    </button>
+      <button onclick={refresh}>
+        {refreshing ? "Refreshing..." : "Refresh Logs"}
+      </button>
     </div>
   </div>
 
   <div class="logs-container">
     {#each [...logs].reverse() as log}
-      <div class="log-entry">
+      <div class="log-entry" class:log-error={log.type === "error"}>
         <span class="log-timestamp">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
         <span class="log-message">{log.message}</span>
       </div>
@@ -116,5 +115,8 @@
     scrollbar-color: var(--color-text-light) var(--color-bg-light);
     font-family: monospace;
   }
-</style>
 
+  .log-error {
+    color: var(--color-danger);
+  }
+</style>
