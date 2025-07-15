@@ -1,5 +1,6 @@
 import JSZip from "jszip";
 import { extractZip } from "./zip.ts";
+import { spawn, StdioOptions } from "node:child_process";
 
 /**
  * Installs SteamCMD to the specified directory.
@@ -33,16 +34,8 @@ export async function downloadSteamCMD(downloadUrl: string, dir: string) {
  *
  * @returns The spawned process of SteamCMD.
  */
-export function runSteamCMD(
-  steamCmdPath: string,
-  args: string[],
-  output: "piped" | "inherit" | "null" = "inherit"
-) {
-  const command = new Deno.Command(steamCmdPath, {
-    args: [...args, "+quit"],
-    stdout: output,
-    stderr: output,
+export function runSteamCMD(steamCmdPath: string, args: string[], output: StdioOptions = "pipe") {
+  return spawn(steamCmdPath, [...args, "+quit"], {
+    stdio: output,
   });
-
-  return command.spawn();
 }

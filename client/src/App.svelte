@@ -12,7 +12,7 @@
 
 <Router {url}>
   <Sidebar />
-  <div>
+  <div class="main-content">
       <Route path="/" component={Dashboard} />
       <Route path="/logs" component={Logs} />
       <Route path="/console" component={Console} />
@@ -22,4 +22,8 @@
 </Router>
 
 <style>
+  .main-content {
+    width: 100%;
+    height: 100vh;
+  }
 </style>

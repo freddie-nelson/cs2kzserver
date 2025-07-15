@@ -31,6 +31,27 @@ export interface ServerLog {
   type: "log" | "error";
 }
 
+const serverLogs: ServerLog[] = [];
+export function addServerLog(message: string, type: "log" | "error" = "log") {
+  serverLogs.push({ timestamp: new Date().toISOString(), message, type });
+}
+
+export function pipeProcessLogsToServerLogs(process: ChildProcess) {
+  process.stdout!.on("data", (data) => {
+    const log = data.toString() as string;
+    if (log) {
+      addServerLog(log, "log");
+    }
+  });
+
+  process.stderr!.on("data", (data) => {
+    const errorLog = data.toString() as string;
+    if (errorLog) {
+      addServerLog(errorLog, "error");
+    }
+  });
+}
+
 let isUpdating = false;
 export async function updateCs2Server(
   startMessage: string = "Updating CS2 server...",
@@ -43,7 +64,7 @@ export async function updateCs2Server(
   isUpdating = true;
 
   try {
-    console.log(startMessage);
+    addServerLog(startMessage);
 
     const { steamCmdExecutable } = await downloadSteamCMD(STEAMCMD_DOWNLOAD_URL, STEAMCMD_DIR);
     const installServerProcess = runSteamCMD(steamCmdExecutable, [
@@ -55,14 +76,14 @@ export async function updateCs2Server(
       "730",
       "+validate",
     ]);
-    await installServerProcess.output();
+    pipeProcessLogsToServerLogs(installServerProcess);
 
     const modifiedExecutablePath = CS2_EXECUTABLE_PATH + ".modified";
     convertExeToConsoleOrWindowMode(CS2_EXECUTABLE_PATH, modifiedExecutablePath, "to_console");
     await Deno.rename(modifiedExecutablePath, CS2_EXECUTABLE_PATH);
 
     if (await exists(CS2_EXECUTABLE_PATH)) {
-      console.log(successMessage);
+      addServerLog(successMessage);
     } else {
       throw new Error(errorMessage);
     }
@@ -92,11 +113,11 @@ export async function installCs2Server() {
 
 export async function updateOrInstallCs2Server() {
   if (await exists(CS2_EXECUTABLE_PATH)) {
-    console.log("CS2 server already installed, skipping installation...");
+    addServerLog("CS2 server already installed, skipping installation...");
     await updateCs2Server();
   } else if (await exists(CS2_DIR)) {
-    console.log("CS2 server directory exists but is not installed, cleaning up...");
-    console.log(
+    addServerLog("CS2 server directory exists but is not installed, cleaning up...");
+    addServerLog(
       "Please remove the directory manually to confirm you want to reinstall CS2 server, then re-run this script."
     );
     Deno.exit(1);
@@ -135,7 +156,6 @@ export async function updateOrInstallPlugins() {
 }
 
 let cs2ServerProcess: ChildProcess | null = null;
-let serverLogs: ServerLog[] = [];
 let isStarting = false;
 export async function startCs2Server() {
   if (!(await exists(CS2_EXECUTABLE_PATH))) {
@@ -147,19 +167,18 @@ export async function startCs2Server() {
 
   try {
     if (cs2ServerProcess) {
-      console.log("CS2 server is already running. Stopping the existing server before starting a new one.");
+      addServerLog("CS2 server is already running. Stopping the existing server before starting a new one.");
       await stopCs2Server();
     }
 
-    console.log("Starting CS2 server...");
-
-    serverLogs = [];
+    addServerLog("Starting CS2 server...");
 
     const process = spawn(
       CS2_EXECUTABLE_PATH,
       [
         "-dedicated",
         "-usercon",
+        "-condebug",
         "-maxplayers_override",
         config.serverMaxPlayers.toString(),
         "-nohltv",
@@ -179,7 +198,7 @@ export async function startCs2Server() {
         "de_dust2",
       ],
       {
-        stdio: "inherit",
+        stdio: ["inherit", "pipe", "pipe"],
       }
     );
     if (!process.pid) {
@@ -187,23 +206,9 @@ export async function startCs2Server() {
     }
 
     process.on("exit", () => (cs2ServerProcess = null));
+    pipeProcessLogsToServerLogs(process);
 
-    // process.stderr.on("data", (data) => {
-    //   const errorLog = data.toString().trim();
-    //   if (errorLog) {
-    //     serverLogs.push({ timestamp: new Date().toISOString(), message: errorLog, type: "error" });
-    //   }
-    // });
-
-    // process.stdout.on("data", (data) => {
-    //   const log = data.toString().trim();
-    //   if (log) {
-    //     serverLogs.push({ timestamp: new Date().toISOString(), message: log, type: "log" });
-    //   }
-    // });
-
-    console.log(`CS2 server started on localhost:${config.serverPort}.`);
-    console.log("You can now connect to the server in game.");
+    addServerLog(`CS2 server started on localhost:${config.serverPort}.`);
 
     return (cs2ServerProcess = process);
   } finally {
@@ -219,10 +224,10 @@ export async function stopCs2Server() {
 
   await endAllRconSessions();
 
-  console.log("Stopping CS2 server...");
+  addServerLog("Stopping CS2 server...");
   cs2ServerProcess.kill("SIGKILL");
   cs2ServerProcess = null;
-  console.log("CS2 server stopped successfully.");
+  addServerLog("CS2 server stopped successfully.");
 }
 
 export function getCs2ServerStatus() {
@@ -303,4 +308,8 @@ export async function endAllRconSessions() {
 
 export function getServerLogs() {
   return serverLogs;
+}
+
+export function clearServerLogs() {
+  serverLogs.length = 0;
 }

@@ -128,8 +128,12 @@ export function endRconSession(sessionId: string) {
   return request<{ sessionId: string }, { message: string }>("/endRconSession", { sessionId });
 }
 
-export function getServerLogs() {
-  return request<undefined, { logs: ServerLog[] }>("/getServerLogs");
+export function getServerLogs(cursor: number = 0) {
+  return request<{ cursor: number }, { logs: ServerLog[] }>("/getServerLogs", { cursor });
+}
+
+export function clearServerLogs() {
+  return request<undefined, { message: string }>("/clearServerLogs");
 }
 
 export function getDashboardData() {

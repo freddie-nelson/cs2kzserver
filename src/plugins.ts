@@ -6,6 +6,7 @@ import { exists } from "jsr:@std/fs/exists";
 import JSZip from "jszip";
 import { extractZip } from "./zip.ts";
 import { normalizeSlash, toAbsolutePath } from "./path.ts";
+import { addServerLog } from "./cs2server.ts";
 
 export const pluginSchema = z.object({
   displayName: z.string(),
@@ -174,7 +175,7 @@ export async function installPluginConfigs(plugin: Plugin) {
     return;
   }
 
-  console.log(`Creating configs for ${plugin.displayName}...`);
+  addServerLog(`Creating configs for ${plugin.displayName}...`);
 
   for (const config of plugin.configs) {
     const targetPath = resolvePluginDir(plugin, config.target);
@@ -203,7 +204,7 @@ export async function installPluginConfigs(plugin: Plugin) {
     await Deno.writeTextFile(targetPath, content);
   }
 
-  console.log(`Configs for ${plugin.displayName} created successfully.`);
+  addServerLog(`Configs for ${plugin.displayName} created successfully.`);
 }
 
 /**
@@ -221,7 +222,7 @@ export async function installPlugin(plugin: Plugin): Promise<boolean> {
 
   const isInstalled = await isPluginInstalled(plugin);
   if (isInstalled && plugin.lastInstalledUrl === plugin.downloadUrl) {
-    console.log(
+    addServerLog(
       `${plugin.displayName} is already installed in the CS2 server directory, skipping installation...`
     );
     await installPluginConfigs(plugin);
@@ -232,7 +233,7 @@ export async function installPlugin(plugin: Plugin): Promise<boolean> {
     await togglePlugin(plugin, true);
   }
 
-  console.log(`Installing ${plugin.displayName}...`);
+  addServerLog(`Installing ${plugin.displayName}...`);
 
   const response = await fetch(plugin.downloadUrl);
   if (!response.ok) {
@@ -253,7 +254,7 @@ export async function installPlugin(plugin: Plugin): Promise<boolean> {
     throw new Error(`${plugin.displayName} installation failed.`);
   }
 
-  console.log(`${plugin.displayName} installed successfully.`);
+  addServerLog(`${plugin.displayName} installed successfully.`);
 
   await installPluginConfigs(plugin);
 
@@ -310,7 +311,7 @@ export async function disableCsSharpPlugin(plugin: Plugin) {
   const disabledPluginPath = pluginPath + ".disabled";
 
   if (await exists(disabledPluginPath)) {
-    console.log(`Plugin ${plugin.displayName} is already disabled.`);
+    addServerLog(`Plugin ${plugin.displayName} is already disabled.`);
     return;
   }
 
@@ -319,7 +320,7 @@ export async function disableCsSharpPlugin(plugin: Plugin) {
   }
 
   Deno.rename(pluginPath, disabledPluginPath);
-  console.log(`Plugin ${plugin.displayName} has been disabled.`);
+  addServerLog(`Plugin ${plugin.displayName} has been disabled.`);
 }
 
 /**
@@ -332,7 +333,7 @@ export async function enableCsSharpPlugin(plugin: Plugin) {
   const disabledPluginPath = pluginPath + ".disabled";
 
   if (await exists(pluginPath)) {
-    console.log(`Plugin ${plugin.displayName} is already enabled.`);
+    addServerLog(`Plugin ${plugin.displayName} is already enabled.`);
     return;
   }
 
@@ -341,7 +342,7 @@ export async function enableCsSharpPlugin(plugin: Plugin) {
   }
 
   Deno.rename(disabledPluginPath, pluginPath);
-  console.log(`Plugin ${plugin.displayName} has been enabled.`);
+  addServerLog(`Plugin ${plugin.displayName} has been enabled.`);
 }
 
 /**
@@ -354,7 +355,7 @@ export async function disableMetamodPlugin(plugin: Plugin) {
   const disabledPluginPath = pluginPath + ".disabled";
 
   if (await exists(disabledPluginPath)) {
-    console.log(`Metamod plugin ${plugin.displayName} is already disabled.`);
+    addServerLog(`Metamod plugin ${plugin.displayName} is already disabled.`);
     return;
   }
 
@@ -363,7 +364,7 @@ export async function disableMetamodPlugin(plugin: Plugin) {
   }
 
   Deno.rename(pluginPath, disabledPluginPath);
-  console.log(`Metamod plugin ${plugin.displayName} has been disabled.`);
+  addServerLog(`Metamod plugin ${plugin.displayName} has been disabled.`);
 }
 
 /**
@@ -376,7 +377,7 @@ export async function enableMetamodPlugin(plugin: Plugin) {
   const disabledPluginPath = pluginPath + ".disabled";
 
   if (await exists(pluginPath)) {
-    console.log(`Metamod plugin ${plugin.displayName} is already enabled.`);
+    addServerLog(`Metamod plugin ${plugin.displayName} is already enabled.`);
     return;
   }
 
@@ -385,7 +386,7 @@ export async function enableMetamodPlugin(plugin: Plugin) {
   }
 
   Deno.rename(disabledPluginPath, pluginPath);
-  console.log(`Metamod plugin ${plugin.displayName} has been enabled.`);
+  addServerLog(`Metamod plugin ${plugin.displayName} has been enabled.`);
 }
 
 /**

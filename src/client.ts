@@ -3,6 +3,7 @@ import { CLIENT_DIR, CLIENT_PORT } from "./env.ts";
 import { join } from "node:path";
 import { lookup } from "mime-types";
 import {
+  clearServerLogs,
   Cs2ServerStatus,
   endRconSession,
   executeRconCommand,
@@ -32,6 +33,10 @@ const executeRconCommandSchema = z.object({
 
 const endRconSessionSchema = z.object({
   sessionId: z.string(),
+});
+
+const getServerLogsSchema = z.object({
+  cursor: z.number().default(0),
 });
 
 function apiResponse(status: number, data: any): Response {
@@ -184,9 +189,20 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
       return apiResponse(500, { error: String(error) });
     }
   },
-  "/getServerLogs": async (_: Request) => {
-    const logs = getServerLogs();
+  "/getServerLogs": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await getServerLogsSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const { cursor } = data;
+    const logs = getServerLogs().slice(cursor);
     return apiResponse(200, { logs });
+  },
+  "/clearServerLogs": async (_: Request) => {
+    clearServerLogs();
+    return apiResponse(200, { message: "Server logs cleared successfully." });
   },
   "/getDashboardData": async (_: Request) => {
     const status = getCs2ServerStatus();
@@ -218,7 +234,7 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
       status,
       plugins: plugins.map(formatPluginForJson),
       configs: await getAllConfigNames(),
-      serverLogs: getServerLogs(),
+      serverLogs: getServerLogs().slice(-100),
       serverConfig,
       connectedPlayers,
       publicAddress,
