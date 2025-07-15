@@ -94,7 +94,11 @@ button {
   }
 
   &:disabled {
-    background-color: var(--color-bg-dark);
     cursor: not-allowed;
+    filter: grayscale(1);
+  }
+
+  &:disabled:hover {
+    background-color: var(--color-primary);
   }
 }
