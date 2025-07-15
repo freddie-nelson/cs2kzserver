@@ -2,7 +2,7 @@
   import { clearServerLogs, getServerLogs, type ServerLog } from "../api/api";
 
   const logs: ServerLog[] = $state([]);
-  let refreshIntervalRaw = $state(1000);
+  let refreshIntervalRaw = $state(2000);
   const refreshInterval = $derived(Math.max(1000, Math.min(60000, refreshIntervalRaw)));
   let refreshing = $state(false);
 
@@ -14,9 +14,9 @@
     logs.push(...newLogs.logs);
     refreshing = false;
   };
+  refresh();
 
   $effect(() => {
-    refresh();
     let interval = setInterval(refresh, refreshInterval);
 
     return () => clearInterval(interval);
