@@ -1,9 +1,11 @@
 <script lang="ts">
   import { endRconSession, executeRconCommand, startRconSession, type ServerLog } from "../api/api";
   import { getConsoleCommands, type ConsoleCommand } from "../api/consoleCommands";
+  import { distance } from "fastest-levenshtein";
 
   const logs: ServerLog[] = $state([]);
   let sending = $state(false);
+  let command = $state("");
 
   let rconSessionId = $state<string | null>(null);
   const validRconSession = $derived(rconSessionId !== null && rconSessionId !== "ERROR");
@@ -82,62 +84,123 @@
       consoleCommands = commands;
     });
   });
+
+  const distanceToCommand = (cmd: ConsoleCommand) => {
+    return (
+      distance(command.toLowerCase(), cmd.command.toLowerCase()) * 20 +
+      distance(command.toLowerCase(), cmd.description.toLowerCase())
+    );
+  };
+  const filteredConsoleCommands = $derived(
+    [...consoleCommands]
+      // .filter((c) => c.command.toLowerCase().includes(command.toLowerCase()))
+      .sort((a, b) => distanceToCommand(a) - distanceToCommand(b))
+      .slice(0, 50)
+  );
 </script>
 
 <main>
-  <div class="logs-container">
-    {#each [...logs].reverse() as log}
-      <div class="log-entry">
-        <span class="log-timestamp">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
-        <span class="log-message">{log.message}</span>
-      </div>
-    {/each}
+  <div class="console">
+    <div class="logs-container">
+      {#each [...logs].reverse() as log}
+        <div class="log-entry">
+          <span class="log-timestamp">[{new Date(log.timestamp).toLocaleTimeString()}]</span>
+          <span class="log-message">{log.message}</span>
+        </div>
+      {/each}
 
-    {#if rconSessionId === null}
-      <p>Connecting...</p>
-    {:else if rconSessionId === "ERROR"}
-      <p>
-        Error connecting to RCON. Is your server running? If yes, check your server's settings and try
-        restarting your server.
-      </p>
-    {:else if logs.length === 0}
-      <p>Connected. No logs yet.</p>
-    {/if}
+      {#if rconSessionId === null}
+        <p>Connecting...</p>
+      {:else if rconSessionId === "ERROR"}
+        <p>
+          Error connecting to RCON. Is your server running? If yes, check your server's settings and try
+          restarting your server.
+        </p>
+      {:else if logs.length === 0}
+        <p>Connected. No logs yet.</p>
+      {/if}
+    </div>
+
+    <form class="footer" onsubmit={send}>
+      <input
+        bind:value={command}
+        name="command"
+        aria-label="RCON Command"
+        type="text"
+        placeholder="Type your command here..."
+        required
+        minlength="1"
+        disabled={!validRconSession}
+      />
+
+      <button disabled={!validRconSession || sending} type="submit">
+        {sending ? "Sending..." : "Send"}
+      </button>
+
+      {#if validRconSession}
+        <button onclick={clear} type="button"> Clear Console </button>
+      {:else}
+        <button onclick={reconnect} type="button">
+          {reconnecting ? "Reconnecting..." : "Reconnect"}
+        </button>
+      {/if}
+    </form>
   </div>
 
-  <form class="footer" onsubmit={send}>
-    <input
-      name="command"
-      aria-label="RCON Command"
-      type="text"
-      placeholder="Type your command here..."
-      required
-      minlength="1"
-      disabled={!validRconSession}
-    />
-
-    <button disabled={!validRconSession || sending} type="submit">
-      {sending ? "Sending..." : "Send"}
-    </button>
-
-    {#if validRconSession}
-      <button onclick={clear} type="button"> Clear Console </button>
-    {:else}
-      <button onclick={reconnect} type="button">
-        {reconnecting ? "Reconnecting..." : "Reconnect"}
-      </button>
-    {/if}
-  </form>
+  <div class="commands">
+    <ul>
+      {#each filteredConsoleCommands as c}
+        <li>
+          <button onclick={() => (command = c.command)}>
+            <strong>{c.command}</strong>: {c.description}
+            {c.defaultValue !== "cmd" ? `(default: ${c.defaultValue})` : ""}
+          </button>
+        </li>
+      {/each}
+    </ul>
+  </div>
 </main>
 
 <style>
   main {
     width: 100%;
-    height: 100%;
+    height: 100vh;
     padding: 2rem;
+    overflow-y: auto;
+  }
+
+  .console {
+    height: 90%;
+    width: 100%;
     display: flex;
     flex-direction: column;
     gap: 0.5rem;
+  }
+
+  .commands {
+    margin-top: 1rem;
+
+    ul {
+      list-style: none;
+      padding: 0;
+      font-size: 1.1rem;
+      color: var(--color-text-light);
+    }
+
+    li {
+      button {
+        background: none;
+        border: none;
+        color: inherit;
+        font: inherit;
+        padding: 0;
+        text-align: left;
+
+        &:hover {
+          text-decoration: underline;
+        }
+      }
+    }
   }
 
   .footer {
