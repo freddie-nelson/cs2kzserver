@@ -133,14 +133,14 @@
         disabled={!validRconSession}
       />
 
-      <button disabled={!validRconSession || sending} type="submit">
+      <button class="btn" disabled={!validRconSession || sending} type="submit">
         {sending ? "Sending..." : "Send"}
       </button>
 
       {#if validRconSession}
-        <button onclick={clear} type="button"> Clear Console </button>
+        <button class="btn" onclick={clear} type="button"> Clear Console </button>
       {:else}
-        <button onclick={reconnect} type="button">
+        <button class="btn" onclick={reconnect} type="button">
           {reconnecting ? "Reconnecting..." : "Reconnect"}
         </button>
       {/if}
@@ -151,7 +151,7 @@
     <ul>
       {#each filteredConsoleCommands as c}
         <li>
-          <button onclick={() => (command = c.command)}>
+          <button class="btn" onclick={() => (command = c.command)}>
             <strong>{c.command}</strong>: {c.description}
             {c.defaultValue !== "cmd" ? `(default: ${c.defaultValue})` : ""}
           </button>
@@ -232,8 +232,6 @@
     background-color: var(--color-bg-dark);
     color: var(--color-text-light);
     border-radius: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-text-light) var(--color-bg-light);
     font-family: monospace;
   }
 </style>

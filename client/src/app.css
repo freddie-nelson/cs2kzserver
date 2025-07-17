@@ -2,6 +2,8 @@
   box-sizing: border-box;
   margin: 0;
   padding: 0;
+  scrollbar-width: thin;
+  scrollbar-color: var(--color-text-light) var(--color-bg-light);
 }
 
 :root {
@@ -12,10 +14,16 @@
   --color-text-light: #4a4a4a;
   --color-primary: #0078d4;
   --color-secondary: #2b88d8;
-  --color-accent: #d83b01;
+  --color-accent: #d40078;
   --color-border: #ccc;
   --sidebar-width: 16rem;
   --color-danger: #e81123;
+  --color-success: #107c6f;
+
+  /* for codeeditor */
+  --color-string: color-mix(in srgb, var(--color-secondary) 50%, var(--color-accent) 50%);
+  --color-number: var(--color-accent);
+  --color-property: var(--color-primary);
 }
 
 @media (prefers-color-scheme: dark) {
@@ -27,9 +35,10 @@
     --color-text-light: #b6b6b6;
     --color-primary: #007acc;
     --color-secondary: #569cd6;
-    --color-accent: #f44747;
+    --color-accent: #cc007a;
     --color-border: #555;
     --color-danger: #e81123;
+    --color-success: #107c10;
   }
 }
 
@@ -83,6 +92,12 @@ label:has(input) {
 }
 
 button {
+  border: none;
+  outline: none;
+  cursor: pointer;
+}
+
+.btn {
   padding: 0.5rem 1rem;
   background-color: var(--color-primary);
   color: var(--color-text);
@@ -102,5 +117,78 @@ button {
 
   &:disabled:hover {
     background-color: var(--color-primary);
+  }
+
+  &.btn--light {
+    background-color: var(--color-bg-light);
+    color: var(--color-text-light);
+  }
+
+  &.btn--light:hover {
+    background-color: var(--color-bg-dark);
+  }
+}
+
+.unstyled-btn {
+  background: none;
+  color: inherit;
+  border: none;
+  padding: 0;
+  font: inherit;
+  cursor: pointer;
+  text-align: left;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 0.5rem;
+}
+
+.pill {
+  padding: 0.25rem 0.5rem;
+  border-radius: 0.4rem;
+  font-size: 0.875rem;
+  color: var(--color-text);
+  background-color: var(--color-bg-light);
+  transition: background-color 0.3s ease;
+
+  &.pill--primary {
+    background-color: var(--color-primary);
+  }
+
+  &.pill--secondary {
+    background-color: var(--color-secondary);
+  }
+
+  &.pill--accent {
+    background-color: var(--color-accent);
+  }
+
+  &.pill--success {
+    background-color: var(--color-success);
+  }
+
+  &.pill--danger {
+    background-color: var(--color-danger);
+  }
+
+  &.pill--sm {
+    font-size: 0.75rem;
+    padding: 0.25rem 0.5rem;
+  }
+}
+
+button.pill {
+  transition: filter 0.3s ease;
+}
+
+button.pill:hover {
+  filter: brightness(0.8);
+}
+
+@media (prefers-color-scheme: dark) {
+  button.pill:hover {
+    filter: brightness(1.3);
   }
 }

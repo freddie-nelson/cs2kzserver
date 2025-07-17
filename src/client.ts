@@ -1,5 +1,5 @@
 import { exists } from "jsr:@std/fs/exists";
-import { CLIENT_DIR, CLIENT_PORT } from "./env.ts";
+import { CLIENT_DIR, CLIENT_PORT, CONFIG_DIR } from "./env.ts";
 import { join } from "node:path";
 import { lookup } from "mime-types";
 import {
@@ -16,6 +16,7 @@ import {
 import { formatPluginForJson, plugins, pluginSchema, updatePluginsConfig } from "./plugins.ts";
 import { getAllConfigNames, getRawConfig, getServerConfig, saveRawConfig } from "./configs.ts";
 import { z } from "zod/v4";
+import { toAbsolutePath } from "./path.ts";
 
 const getConfigSchema = z.object({
   name: z.string(),
@@ -87,7 +88,7 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
 
     const plugin = data;
     const existingPlugin = plugins.findIndex((p) => p.name === plugin.name);
-    if (!existingPlugin) {
+    if (existingPlugin === -1) {
       plugins.push(plugin);
     } else {
       plugins[existingPlugin] = plugin;
@@ -122,6 +123,21 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
   "/getConfigNames": async (_: Request) => {
     const configNames = await getAllConfigNames();
     return apiResponse(200, { configNames });
+  },
+  "/getConfigs": async (_: Request) => {
+    const configNames = await getAllConfigNames();
+    const configs = await Promise.all(
+      configNames.map(async (name) => {
+        const config = await getRawConfig(name);
+        const plugin = plugins.find((p) =>
+          p.configs.find((c) => toAbsolutePath(String(c.config)) === join(CONFIG_DIR, name))
+        );
+
+        return { name, config, plugin: plugin ? formatPluginForJson(plugin) : undefined };
+      })
+    );
+
+    return apiResponse(200, { configs });
   },
   "/getConfig": async (req: Request) => {
     const json = await req.json();

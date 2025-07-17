@@ -19,6 +19,12 @@
     "vite": "7.0.3"
   },
   "dependencies": {
-    "fastest-levenshtein": "^1.0.16"
+    "@codemirror/lang-json": "^6.0.2",
+    "@codemirror/language": "^6.11.2",
+    "@fsegurai/codemirror-theme-github-dark": "^6.2.0",
+    "@lezer/highlight": "^1.2.1",
+    "fastest-levenshtein": "^1.0.16",
+    "svelte-codemirror-editor": "^1.4.1",
+    "thememirror": "^2.0.1"
   }
 }

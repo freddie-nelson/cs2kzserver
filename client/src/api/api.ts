@@ -16,7 +16,7 @@ export interface Plugin {
   displayName: string;
   name: string;
   description: string;
-  type: "metamod" | "counterstrikesharp";
+  type: "metamod" | "counterstrikesharp" | "configonly";
   downloadUrl: string;
   targetExtractDir: string;
   enabled: boolean;
@@ -55,6 +55,12 @@ export interface DashboardData {
   connectedPlayers: number;
   localAddress: string;
   publicAddress: string;
+}
+
+export interface Config {
+  name: string;
+  config: string;
+  plugin?: Plugin;
 }
 
 async function request<Req, Res>(endpoint: string, body?: Req): Promise<Res> {
@@ -103,6 +109,10 @@ export function deletePlugin(pluginName: string) {
 
 export function getConfigNames() {
   return request<undefined, { names: string[] }>("/getConfigNames");
+}
+
+export function getConfigs() {
+  return request<undefined, { configs: Config[] }>("/getConfigs");
 }
 
 export function getConfig(name: string) {

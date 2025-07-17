@@ -43,11 +43,11 @@
         <input type="number" bind:value={refreshIntervalRaw} min="1000" />
       </label>
 
-      <button onclick={clear}>
+      <button class="btn" onclick={clear}>
         {clearing ? "Clearing..." : "Clear Logs"}
       </button>
 
-      <button onclick={refresh}>
+      <button class="btn" onclick={refresh}>
         {refreshing ? "Refreshing..." : "Refresh Logs"}
       </button>
     </div>
@@ -111,8 +111,6 @@
     background-color: var(--color-bg-dark);
     color: var(--color-text-light);
     border-radius: 0.5rem;
-    scrollbar-width: thin;
-    scrollbar-color: var(--color-text-light) var(--color-bg-light);
     font-family: monospace;
   }
 

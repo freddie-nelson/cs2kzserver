@@ -45,7 +45,7 @@
     "type": "metamod",
     "downloadUrl": "https://github.com/KZGlobalTeam/cs2kz-metamod/releases/download/v0.0.27/cs2kz-windows-master.zip",
     "targetExtractDir": "@csgo",
-    "enabled": true,
+    "enabled": false,
     "isCounterStrikeSharpSharedPlugin": false,
     "dependencies": [],
     "configs": [],
@@ -206,7 +206,7 @@
     "enabled": false,
     "isCounterStrikeSharpSharedPlugin": false,
     "dependencies": [
-      "RetakesPlugin",
+      "RetakesPluginShared",
       "counterstrikesharp"
     ],
     "configs": [
@@ -389,7 +389,7 @@
     "type": "counterstrikesharp",
     "downloadUrl": "https://github.com/Kamiloo13/CS2_ChangeLevelChat/releases/download/v1.0.0/ChangeLevelChat_v1.0.0.zip",
     "targetExtractDir": "@cssharpplugins",
-    "enabled": false,
+    "enabled": true,
     "isCounterStrikeSharpSharedPlugin": false,
     "dependencies": [
       "counterstrikesharp"
