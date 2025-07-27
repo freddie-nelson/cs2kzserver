@@ -247,4 +247,8 @@
   :global(.cm-focused .cm-selectionBackground) {
     background: color-mix(in srgb, var(--color-secondary) 10%, transparent) !important;
   }
+
+  :global(.cm-selectionMatch) {
+    background: color-mix(in srgb, var(--color-secondary) 20%, transparent) !important;
+  }
 </style>

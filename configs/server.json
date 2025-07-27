@@ -5,5 +5,98 @@
   "serverLanOnly": false,
   "serverCheatsEnabled": false,
   "serverRconPassword": "password",
-  "serverMaxPlayers": 16
+  "serverMaxPlayers": 16,
+  "maps": [
+    {
+      "name": "ar_baggage",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/ar_baggage.png?raw=true"
+    },
+    {
+      "name": "ar_pool_day",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/ar_pool_day.png?raw=true"
+    },
+    {
+      "name": "cs_agency",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/cs_agency.png?raw=true"
+    },
+    {
+      "name": "cs_office",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/cs_office.png?raw=true"
+    },
+    {
+      "name": "de_ancient",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_ancient.png?raw=true"
+    },
+    {
+      "name": "de_anubis",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_anubis.png?raw=true"
+    },
+    {
+      "name": "de_brewery",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_brewery.png?raw=true"
+    },
+    {
+      "name": "de_dogtown",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_dogtown.png?raw=true"
+    },
+    {
+      "name": "de_dust2",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_dust2.png?raw=true"
+    },
+    {
+      "name": "de_grail",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_grail.png?raw=true"
+    },
+    {
+      "name": "de_inferno",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_inferno.png?raw=true"
+    },
+    {
+      "name": "de_jura",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_jura.png?raw=true"
+    },
+    {
+      "name": "de_mirage",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_mirage.png?raw=true"
+    },
+    {
+      "name": "de_nuke",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_nuke.png?raw=true"
+    },
+    {
+      "name": "de_overpass",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_overpass.png?raw=true"
+    },
+    {
+      "name": "de_train",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_train.png?raw=true"
+    },
+    {
+      "name": "de_vertigo",
+      "type": "valve",
+      "image": "https://raw.githubusercontent.com/ghostcap-gaming/cs2-map-images/refs/heads/main/cs2/de_vertigo.png?raw=true"
+    },
+    {
+      "name": "kz_grotto",
+      "type": "workshop",
+      "workshopId": "3121168339",
+      "image": "https://images.steamusercontent.com/ugc/11923947287430711/04D731A04193F035DA4A5A62FB2C33705E08DB3D/?imw=200&imh=112&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true"
+    }
+  ]
 }

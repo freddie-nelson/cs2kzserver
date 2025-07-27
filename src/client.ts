@@ -14,9 +14,17 @@ import {
   stopCs2Server,
 } from "./cs2server.ts";
 import { formatPluginForJson, plugins, pluginSchema, updatePluginsConfig } from "./plugins.ts";
-import { getAllConfigNames, getRawConfig, getServerConfig, saveRawConfig } from "./configs.ts";
+import {
+  getAllConfigNames,
+  getRawConfig,
+  getServerConfig,
+  saveJsonConfig,
+  saveRawConfig,
+  ServerMap,
+} from "./configs.ts";
 import { z } from "zod/v4";
 import { toAbsolutePath } from "./path.ts";
+import { DOMParser } from "jsr:@b-fuze/deno-dom";
 
 const getConfigSchema = z.object({
   name: z.string(),
@@ -39,6 +47,16 @@ const endRconSessionSchema = z.object({
 const getServerLogsSchema = z.object({
   cursor: z.number().default(0),
 });
+
+const addWorkshopMapSchema = z.object({
+  mapName: z.string(),
+});
+
+const setActiveMapSchema = z.object({
+  mapName: z.string(),
+});
+
+const mapNameRegex = /loaded spawngroup\(\s+1\)(.*?)\[1: (.*?)\s+\|/;
 
 function apiResponse(status: number, data: any): Response {
   return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -256,6 +274,132 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
       publicAddress,
       localAddress,
     });
+  },
+  "/addWorkshopMap": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await addWorkshopMapSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const config = await getServerConfig();
+
+    const { mapName } = data;
+    if (!mapName.trim() || config.maps.some((m) => m.name === mapName)) {
+      return apiResponse(400, { error: "Invalid map name" });
+    }
+
+    const workshopSearch = await fetch(
+      `https://steamcommunity.com/workshop/browse/?appid=730&searchtext=${encodeURIComponent(
+        mapName
+      )}&requiredtags%5B%5D=Map`
+    );
+    if (!workshopSearch.ok) {
+      return apiResponse(500, { error: "Failed to search for workshop maps." });
+    }
+
+    const workshopSearchText = await workshopSearch.text();
+
+    const dom = new DOMParser().parseFromString(workshopSearchText, "text/html");
+    const mapTitleElement = Array.from(dom.querySelectorAll(".workshopItemTitle")).find(
+      (el) => el.textContent?.trim() === mapName
+    );
+    if (!mapTitleElement) {
+      return apiResponse(404, { error: "Workshop map not found." });
+    }
+
+    const mapUrl = new URL(mapTitleElement.parentElement?.getAttribute("href") ?? "");
+    mapUrl.searchParams.set("imw", "5000");
+    mapUrl.searchParams.set("imh", "5000");
+    mapUrl.searchParams.set("letterbox", "false");
+    const mapId = mapUrl.searchParams.get("id");
+
+    const mapImageElement =
+      mapTitleElement.parentElement?.parentElement?.querySelector(".workshopItemPreviewImage");
+    if (!mapId || !mapImageElement) {
+      return apiResponse(404, { error: "Workshop map not found." });
+    }
+
+    const map: ServerMap = {
+      name: mapName,
+      type: "workshop",
+      workshopId: mapId,
+      image: mapImageElement.getAttribute("src") || "",
+    };
+
+    await saveJsonConfig("server.json", {
+      ...config,
+      maps: [...(config.maps ?? []), map],
+    });
+
+    // Here you would implement the logic to add the workshop map
+    // For now, we will just return a success message
+    return apiResponse(200, { message: `Workshop map ${mapName} added successfully.` });
+  },
+  "/getActiveMap": async (_: Request) => {
+    if (getCs2ServerStatus() !== Cs2ServerStatus.RUNNING) {
+      return apiResponse(200, { map: null });
+    }
+
+    const rconSessionId = await startRconSession();
+    const res = await executeRconCommand(rconSessionId, "status");
+    await endRconSession(rconSessionId);
+
+    const map = res.match(mapNameRegex)?.[2]?.trim() || null;
+
+    return apiResponse(200, { map });
+  },
+  "/setActiveMap": async (req: Request) => {
+    const json = await req.json();
+    const { success, data } = await setActiveMapSchema.safeParseAsync(json);
+    if (!success) {
+      return apiResponse(400, { error: "Invalid data" });
+    }
+
+    const { mapName } = data;
+    const config = await getServerConfig();
+    const map = config.maps.find((m) => m.name === mapName);
+
+    if (!map) {
+      return apiResponse(404, { error: "Map not found in server configuration." });
+    }
+
+    if (getCs2ServerStatus() !== Cs2ServerStatus.RUNNING) {
+      return apiResponse(400, { error: "Server must be running to set active map." });
+    }
+
+    const rconSessionId = await startRconSession();
+
+    let res: string;
+    if (map.type === "workshop") {
+      res = await executeRconCommand(rconSessionId, `host_workshop_map ${map.workshopId}`);
+    } else {
+      res = await executeRconCommand(rconSessionId, `map ${map.name}`);
+    }
+
+    if (!res.includes("Error")) {
+      const status = await executeRconCommand(rconSessionId, "status");
+      let activeMap = status.match(mapNameRegex)?.[2]?.trim() || null;
+      for (let i = 0; i < 10 && activeMap !== mapName; i++) {
+        await new Promise((resolve) => setTimeout(resolve, 1000));
+
+        const status = await executeRconCommand(rconSessionId, "status");
+        activeMap = status.match(mapNameRegex)?.[2]?.trim() || null;
+      }
+
+      await endRconSession(rconSessionId);
+
+      if (activeMap !== mapName) {
+        return apiResponse(500, {
+          error: `Could not determine if active map was set successfully, refresh the page or try again.`,
+        });
+      }
+
+      return apiResponse(200, { message: `Map ${mapName} set as active successfully.` });
+    } else {
+      await endRconSession(rconSessionId);
+      return apiResponse(500, { error: `Failed to set active map: ${res}` });
+    }
   },
 };
 

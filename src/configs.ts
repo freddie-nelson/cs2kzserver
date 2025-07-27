@@ -1,6 +1,13 @@
 import { join } from "node:path";
 import { CONFIG_DIR } from "./env.ts";
 
+export interface ServerMap {
+  name: string;
+  type: "valve" | "workshop";
+  workshopId?: string;
+  image: string;
+}
+
 export interface ServerConfig {
   steamGsltToken: string;
   serverIp: string;
@@ -9,6 +16,7 @@ export interface ServerConfig {
   serverCheatsEnabled: boolean;
   serverRconPassword: string;
   serverMaxPlayers: number;
+  maps: ServerMap[];
 }
 
 export async function getAllConfigNames(): Promise<string[]> {

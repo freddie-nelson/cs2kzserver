@@ -19,6 +19,8 @@
   --sidebar-width: 16rem;
   --color-danger: #e81123;
   --color-success: #107c6f;
+  --color-warning: #ffb900;
+  --color-modal-overlay: color-mix(in srgb, var(--color-bg-dark), transparent 30%)
 
   /* for codeeditor */
   --color-string: color-mix(in srgb, var(--color-secondary) 50%, var(--color-accent) 50%);
@@ -39,6 +41,13 @@
     --color-border: #555;
     --color-danger: #e81123;
     --color-success: #107c10;
+    --color-warning: #ffb900;
+    --color-modal-overlay: color-mix(in srgb, var(--color-bg-dark), transparent 30%);
+
+    /* for codeeditor */
+    --color-string: color-mix(in srgb, var(--color-secondary) 50%, var(--color-accent) 50%);
+    --color-number: var(--color-accent);
+    --color-property: var(--color-primary);
   }
 }
 
@@ -126,6 +135,11 @@ button {
 
   &.btn--light:hover {
     background-color: var(--color-bg-dark);
+  }
+
+  &.btn--danger {
+    background-color: var(--color-danger);
+    color: var(--color-text);
   }
 }
 

@@ -36,6 +36,13 @@ export interface ServerLog {
   type: "log" | "error";
 }
 
+export interface ServerMap {
+  name: string;
+  type: "valve" | "workshop";
+  workshopId?: string;
+  image: string;
+}
+
 export interface ServerConfig {
   steamGsltToken: string;
   serverPort: number;
@@ -44,6 +51,7 @@ export interface ServerConfig {
   serverNetconPort: number;
   serverNetconPassword: string;
   serverMaxPlayers: number;
+  maps: ServerMap[];
 }
 
 export interface DashboardData {
@@ -73,7 +81,11 @@ async function request<Req, Res>(endpoint: string, body?: Req): Promise<Res> {
   });
 
   if (!response.ok || response.status !== 200) {
-    throw new Error(`Request failed with status ${response.status}`);
+    throw new Error(
+      `Request failed with status ${response.status}. Message: ${
+        (await response.json()).error || "Unknown error"
+      }`
+    );
   }
 
   return response.json() as Promise<Res>;
@@ -119,6 +131,10 @@ export function getConfig(name: string) {
   return request<{ name: string }, { config: string }>("/getConfig", { name });
 }
 
+export async function getServerConfig() {
+  return JSON.parse((await getConfig("server.json")).config) as ServerConfig;
+}
+
 export function saveConfig(name: string, config: string) {
   return request<{ name: string; config: string }, { message: string }>("/saveConfig", { name, config });
 }
@@ -148,4 +164,16 @@ export function clearServerLogs() {
 
 export function getDashboardData() {
   return request<undefined, DashboardData>("/getDashboardData");
+}
+
+export function addWorkshopMap(mapName: string) {
+  return request<{ mapName: string }, { message: string }>("/addWorkshopMap", { mapName });
+}
+
+export function getActiveMap() {
+  return request<undefined, { map: string | null }>("/getActiveMap");
+}
+
+export function setActiveMap(mapName: string) {
+  return request<{ mapName: string }, { message: string }>("/setActiveMap", { mapName });
 }
