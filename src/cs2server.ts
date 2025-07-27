@@ -296,6 +296,7 @@ export async function endRconSession(sessionId: string) {
   }
 
   await rcon.end();
+  await new Promise((resolve) => setTimeout(resolve, 1000)); // Ensure the session is properly closed
   rconSessions.delete(sessionId);
 }
 
@@ -312,4 +313,23 @@ export function getServerLogs() {
 
 export function clearServerLogs() {
   serverLogs.length = 0;
+}
+
+export async function getActiveMap() {
+  if (getCs2ServerStatus() !== Cs2ServerStatus.RUNNING) {
+    return null;
+  }
+
+  try {
+    const rconSessionId = await startRconSession();
+    const res = await executeRconCommand(rconSessionId, "status");
+    await endRconSession(rconSessionId);
+
+    const mapNameRegex = /loaded spawngroup\(\s+1\)(.*?)\[1: (.*?)\s+\|/;
+    const map = res.match(mapNameRegex)?.[2]?.trim() || null;
+
+    return map;
+  } catch {
+    return null;
+  }
 }

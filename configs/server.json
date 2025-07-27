@@ -1,5 +1,6 @@
 {
   "steamGsltToken": "537E452B20C4B87EF0BC234D36E3CECA",
+  "serverName": "CS2KZ Server",
   "serverIp": "127.0.0.1",
   "serverPort": 27015,
   "serverLanOnly": false,
@@ -103,12 +104,6 @@
       "type": "workshop",
       "workshopId": "3489356818",
       "image": "https://images.steamusercontent.com/ugc/14827388698616599198/7C106EE6554A51A156C1737430EE1E0E194DC3F8/?imw=200&imh=112&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true"
-    },
-    {
-      "name": "kz_leviathan",
-      "type": "workshop",
-      "workshopId": "3374560468",
-      "image": "https://images.steamusercontent.com/ugc/17002524442741710790/B1602E362188BF8371F1B3BC92E80A334EA08ECD/?imw=200&imh=112&ima=fit&impolicy=Letterbox&imcolor=%23000000&letterbox=true"
     }
   ]
 }

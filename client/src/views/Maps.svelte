@@ -5,16 +5,17 @@
     type ServerMap,
     type ServerConfig,
     getActiveMap,
-    setActiveMap,
-    saveConfig,
   } from "../api/api";
   import LoadingMask from "../components/LoadingMask.svelte";
+  import Map from "../components/Map.svelte";
   import Modal from "../components/Modal.svelte";
 
   let maps: ServerMap[] | null = $state(null);
   let activeMap: string | null = $state(null);
 
   const updateMaps = async () => {
+    maps = null;
+    activeMap = null;
     activeMap = await getActiveMap().then((res) => res.map || null);
     maps = await getServerConfig().then((c: ServerConfig) => c.maps);
   };
@@ -65,45 +66,6 @@
     mapName = "";
     isAddingMap = false;
   };
-
-  let isDeletingMap = $state(false);
-  const deleteMap = async (map: ServerMap) => {
-    if (isDeletingMap || !confirm(`Are you sure you want to delete the map "${map.name}"?`)) {
-      return;
-    }
-
-    isDeletingMap = true;
-    try {
-      const config = await getServerConfig();
-      config.maps = config.maps.filter((m) => m.name !== map.name);
-      await saveConfig("server.json", JSON.stringify(config, null, 2));
-      await updateMaps();
-      alert(`Map "${map.name}" deleted successfully.`);
-    } catch (error) {
-      alert(`Failed to delete map "${map.name}": ${error}`);
-    }
-    isDeletingMap = false;
-  };
-
-  let isEnablingMap = $state(false);
-  const enableMap = async (map: ServerMap) => {
-    if (activeMap === map.name) {
-      alert("This map is already the active map.");
-      return;
-    }
-
-    isEnablingMap = true;
-
-    try {
-      await setActiveMap(map.name);
-      activeMap = map.name;
-      alert(`Map "${map.name}" is now active.`);
-    } catch (error) {
-      alert(`Failed to set active map: ${error}`);
-    }
-
-    isEnablingMap = false;
-  };
 </script>
 
 <main>
@@ -143,32 +105,12 @@
 
     <div class="maps">
       {#each sortedMaps as map}
-        <div class="map" class:active={activeMap === map.name}>
-          <img src={map.image} alt={map.name} />
-
-          <h2>{map.name}</h2>
-
-          <div class="map-info">
-            <div class="pills">
-              <span class="pill" class:pill--accent={map.type === "workshop"}>
-                {map.type}
-              </span>
-              {#if activeMap === map.name}
-                <span class="pill pill--success">active</span>
-              {/if}
-            </div>
-
-            <div class="buttons">
-              <button class="btn" onclick={() => enableMap(map)} disabled={isEnablingMap}>
-                Set Active
-              </button>
-
-              <button class="btn btn--danger" onclick={() => deleteMap(map)} disabled={isDeletingMap}>
-                Delete
-              </button>
-            </div>
-          </div>
-        </div>
+        <Map
+          {map}
+          isActive={map.name === activeMap}
+          onActivate={() => (activeMap = map.name)}
+          onDelete={() => updateMaps()}
+        />
       {/each}
     </div>
   {:else}
@@ -183,7 +125,7 @@
   </label>
 </Modal>
 
-<LoadingMask loading={isEnablingMap || isAddingMap || isDeletingMap} />
+<LoadingMask loading={isAddingMap} />
 
 <style>
   main {
@@ -218,43 +160,6 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
     gap: 1rem;
-  }
-
-  .map {
-    background-color: var(--color-bg-dark);
-    padding: 1rem;
-    border-radius: 0.5rem;
-    display: flex;
-    flex-direction: column;
-    gap: 0.5rem;
-    min-height: 14rem;
-    height: min-content;
-    transition: transform 0.2s ease;
-
-    img {
-      width: 100%;
-      height: auto;
-      border-radius: 0.25rem;
-    }
-
-    h2 {
-      font-size: 1.25rem;
-    }
-
-    &:hover {
-      transform: scale(1.03);
-    }
-
-    &.active {
-      border: 0.2rem solid var(--color-success);
-    }
-
-    .map-info {
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-      margin-top: auto;
-    }
   }
 
   .active-map-warning {

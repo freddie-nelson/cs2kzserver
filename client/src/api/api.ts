@@ -45,18 +45,20 @@ export interface ServerMap {
 
 export interface ServerConfig {
   steamGsltToken: string;
+  serverName: string;
+  serverIp: string;
   serverPort: number;
   serverLanOnly: boolean;
   serverCheatsEnabled: boolean;
-  serverNetconPort: number;
-  serverNetconPassword: string;
+  serverRconPassword: string;
   serverMaxPlayers: number;
   maps: ServerMap[];
 }
 
 export interface DashboardData {
   status: Cs2ServerStatus;
-  plugin: Plugin[];
+  activeMap: string | null;
+  plugins: Plugin[];
   serverConfig: ServerConfig;
   serverLogs: ServerLog[];
   configs: string[];

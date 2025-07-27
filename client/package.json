@@ -25,6 +25,7 @@
     "@lezer/highlight": "^1.2.1",
     "fastest-levenshtein": "^1.0.16",
     "svelte-codemirror-editor": "^1.4.1",
-    "thememirror": "^2.0.1"
+    "thememirror": "^2.0.1",
+    "timeago.js": "^4.0.2"
   }
 }

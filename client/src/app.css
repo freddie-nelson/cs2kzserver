@@ -93,7 +93,23 @@ input {
   }
 }
 
-label:has(input) {
+select {
+  font-family: inherit;
+  font-size: 1rem;
+  padding: 0.5rem 0.75rem;
+  border: 1px solid var(--color-bg-light);
+  outline: none;
+  border-radius: 0.4rem;
+  background-color: var(--color-bg-dark);
+  color: var(--color-text);
+  transition: border-color 0.3s ease;
+
+  &:focus {
+    border-color: var(--color-border);
+  }
+}
+
+label:has(input), label:has(select) {
   display: flex;
   flex-direction: column;
   color: var(--color-text-light);

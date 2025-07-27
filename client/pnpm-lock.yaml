@@ -29,6 +29,9 @@ importers:
       thememirror:
         specifier: ^2.0.1
         version: 2.0.1(@codemirror/language@6.11.2)(@codemirror/state@6.5.2)(@codemirror/view@6.38.1)
+      timeago.js:
+        specifier: ^4.0.2
+        version: 4.0.2
     devDependencies:
       '@sveltejs/vite-plugin-svelte':
         specifier: 5.1.0
@@ -554,6 +557,9 @@ packages:
       '@codemirror/state': ^6.0.0
       '@codemirror/view': ^6.0.0
 
+  timeago.js@4.0.2:
+    resolution: {integrity: sha512-a7wPxPdVlQL7lqvitHGGRsofhdwtkoSXPGATFuSOA2i1ZNQEPLrGnj68vOp2sOJTCFAQVXPeNMX/GctBaO9L2w==}
+
   tinyglobby@0.2.14:
     resolution: {integrity: sha512-tX5e7OM1HnYr2+a2C/4V0htOcSQcoSTH9KgJnVvNm5zm/cyEWKJ7j7YutsH9CxMdtOkkLFy2AHrMci9IM8IPZQ==}
     engines: {node: '>=12.0.0'}
@@ -1063,6 +1069,8 @@ snapshots:
       '@codemirror/language': 6.11.2
       '@codemirror/state': 6.5.2
       '@codemirror/view': 6.38.1
+
+  timeago.js@4.0.2: {}
 
   tinyglobby@0.2.14:
     dependencies:

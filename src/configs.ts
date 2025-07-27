@@ -10,6 +10,7 @@ export interface ServerMap {
 
 export interface ServerConfig {
   steamGsltToken: string;
+  serverName: string;
   serverIp: string;
   serverPort: number;
   serverLanOnly: boolean;

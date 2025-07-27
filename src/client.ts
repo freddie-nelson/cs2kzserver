@@ -7,6 +7,7 @@ import {
   Cs2ServerStatus,
   endRconSession,
   executeRconCommand,
+  getActiveMap,
   getCs2ServerStatus,
   getServerLogs,
   startCs2Server,
@@ -55,8 +56,6 @@ const addWorkshopMapSchema = z.object({
 const setActiveMapSchema = z.object({
   mapName: z.string(),
 });
-
-const mapNameRegex = /loaded spawngroup\(\s+1\)(.*?)\[1: (.*?)\s+\|/;
 
 function apiResponse(status: number, data: any): Response {
   return new Response(JSON.stringify(data), { status, headers: { "Content-Type": "application/json" } });
@@ -266,6 +265,7 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
 
     return apiResponse(200, {
       status,
+      activeMap: await getActiveMap(),
       plugins: plugins.map(formatPluginForJson),
       configs: await getAllConfigNames(),
       serverLogs: getServerLogs().slice(-100),
@@ -337,17 +337,8 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
     return apiResponse(200, { message: `Workshop map ${mapName} added successfully.` });
   },
   "/getActiveMap": async (_: Request) => {
-    if (getCs2ServerStatus() !== Cs2ServerStatus.RUNNING) {
-      return apiResponse(200, { map: null });
-    }
-
-    const rconSessionId = await startRconSession();
-    const res = await executeRconCommand(rconSessionId, "status");
-    await endRconSession(rconSessionId);
-
-    const map = res.match(mapNameRegex)?.[2]?.trim() || null;
-
-    return apiResponse(200, { map });
+    const activeMap = await getActiveMap();
+    return apiResponse(200, { map: activeMap });
   },
   "/setActiveMap": async (req: Request) => {
     const json = await req.json();
@@ -377,17 +368,14 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
       res = await executeRconCommand(rconSessionId, `map ${map.name}`);
     }
 
+    await endRconSession(rconSessionId);
+
     if (!res.includes("Error")) {
-      const status = await executeRconCommand(rconSessionId, "status");
-      let activeMap = status.match(mapNameRegex)?.[2]?.trim() || null;
+      let activeMap: string | null = null;
       for (let i = 0; i < 20 && activeMap !== mapName; i++) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
-
-        const status = await executeRconCommand(rconSessionId, "status");
-        activeMap = status.match(mapNameRegex)?.[2]?.trim() || null;
+        activeMap = await getActiveMap();
       }
-
-      await endRconSession(rconSessionId);
 
       if (activeMap !== mapName) {
         return apiResponse(500, {
