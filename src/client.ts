@@ -380,7 +380,7 @@ const apiHandlers: Record<string, (req: Request) => Promise<Response>> = {
     if (!res.includes("Error")) {
       const status = await executeRconCommand(rconSessionId, "status");
       let activeMap = status.match(mapNameRegex)?.[2]?.trim() || null;
-      for (let i = 0; i < 10 && activeMap !== mapName; i++) {
+      for (let i = 0; i < 20 && activeMap !== mapName; i++) {
         await new Promise((resolve) => setTimeout(resolve, 1000));
 
         const status = await executeRconCommand(rconSessionId, "status");

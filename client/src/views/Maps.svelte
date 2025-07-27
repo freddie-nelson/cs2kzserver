@@ -62,6 +62,7 @@
       alert(`Failed to add map "${mapName.trim()}": ${error}`);
     }
 
+    mapName = "";
     isAddingMap = false;
   };
 
