@@ -1,8 +1,10 @@
 <script lang="ts">
   import {
     activatePluginGroup,
+    Cs2ServerStatus,
     getPluginGroups,
     getPlugins,
+    getServerStatus,
     savePluginGroups,
     type Plugin,
     type PluginGroups,
@@ -78,6 +80,12 @@
     }
 
     try {
+      const status = await getServerStatus();
+      if (status.status !== Cs2ServerStatus.STOPPED) {
+        alert("You must stop the server before enabling/disabling plugins.");
+        return;
+      }
+
       await activatePluginGroup(group);
       plugins = (await getPlugins()).plugins;
       onActivate(plugins);

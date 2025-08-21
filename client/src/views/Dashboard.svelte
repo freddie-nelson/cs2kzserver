@@ -1,6 +1,7 @@
 <script lang="ts">
   import { getDashboardData, type DashboardData } from "../api/api";
   import DashboardMap from "../components/DashboardMap.svelte";
+  import PluginGroups from "../components/PluginGroups.svelte";
   import StartStopButton from "../components/StartStopButton.svelte";
   import { useTimeAgo } from "../utils/timeago.svelte";
 
@@ -78,6 +79,8 @@
       </div>
 
       <DashboardMap {data} onMapChange={() => refreshData()} />
+
+      <PluginGroups />
     </div>
   {:else}
     <p>Loading...</p>
@@ -116,8 +119,8 @@
     gap: 1rem;
     grid-template-areas:
       "info info info info status status"
-      "map map . . . ."
-      "map map . . . ."
+      "map map plgs plgs plgs plgs"
+      "map map plgs plgs plgs plgs"
       ". . . . . ."
       ". . . . . ."
       ". . . . . .";
@@ -176,5 +179,11 @@
 
   :global(.dashboard-card-title) {
     font-size: 1.1rem;
+  }
+
+  :global(.dashboard .plugin-groups) {
+    grid-area: plgs;
+    width: 100%;
+    height: 100% !important;
   }
 </style>
