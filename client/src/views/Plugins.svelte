@@ -3,6 +3,7 @@
   import { Cs2ServerStatus, getPlugins, getServerStatus, updatePlugin, type Plugin } from "../api/api";
   import { joinWithAnd } from "../utils/array";
   import { navigate } from "svelte5-router";
+  import PluginGroups from "../components/PluginGroups.svelte";
 
   let plugins: Plugin[] | null = $state(null);
   getPlugins().then((p) => {
@@ -67,6 +68,8 @@
       Show Only Enabled Plugins
     </button>
   </div>
+
+  <PluginGroups onActivate={(plgs) => (plugins = plgs)} />
 
   {#if plugins}
     <div class="plugins">
@@ -154,6 +157,7 @@
     display: grid;
     grid-template-columns: repeat(auto-fill, minmax(20rem, 1fr));
     gap: 1rem;
+    margin-top: 1rem;
   }
 
   .plugin {

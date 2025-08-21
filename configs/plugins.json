@@ -45,7 +45,7 @@
     "type": "metamod",
     "downloadUrl": "https://github.com/KZGlobalTeam/cs2kz-metamod/releases/download/v0.0.27/cs2kz-windows-master.zip",
     "targetExtractDir": "@csgo",
-    "enabled": false,
+    "enabled": true,
     "isCounterStrikeSharpSharedPlugin": false,
     "dependencies": [],
     "configs": [],

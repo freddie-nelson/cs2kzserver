@@ -73,6 +73,10 @@ export interface Config {
   plugin?: Plugin;
 }
 
+export interface PluginGroups {
+  [groupName: string]: string[];
+}
+
 async function request<Req, Res>(endpoint: string, body?: Req): Promise<Res> {
   const response = await fetch(`${apiUrl}${endpoint}`, {
     method: "POST",
@@ -178,4 +182,33 @@ export function getActiveMap() {
 
 export function setActiveMap(mapName: string) {
   return request<{ mapName: string }, { message: string }>("/setActiveMap", { mapName });
+}
+
+export async function getPluginGroups() {
+  const config = JSON.parse((await getConfig("pluginGroups.json")).config) as PluginGroups;
+  if (typeof config !== "object" || config === null || Array.isArray(config)) {
+    return {};
+  }
+
+  return config;
+}
+
+export function savePluginGroups(groups: PluginGroups) {
+  return saveConfig("pluginGroups.json", JSON.stringify(groups, null, 2));
+}
+
+export async function activatePluginGroup(pluginNames: string[]) {
+  const plugins = (await getPlugins()).plugins;
+
+  await Promise.all(
+    plugins.map(async (plugin) => {
+      if (pluginNames.includes(plugin.name)) {
+        plugin.enabled = true;
+        await updatePlugin(plugin);
+      } else {
+        plugin.enabled = false;
+        await updatePlugin(plugin);
+      }
+    })
+  );
 }

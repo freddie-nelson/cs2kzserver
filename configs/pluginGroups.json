@@ -1,0 +1,17 @@
+{
+  "KZ": [
+    "counterstrikesharp",
+    "ServerConfigCopy",
+    "cs2kz",
+    "sql_mm",
+    "AnyBaseLib",
+    "PlayerSettings",
+    "MenuManagerCore",
+    "WeaponPaints",
+    "GG1MapChooser",
+    "ChangeLevelChat"
+  ],
+  "VANILLA": [
+    "cs2kz"
+  ]
+}

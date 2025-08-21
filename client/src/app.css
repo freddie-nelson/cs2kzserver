@@ -15,9 +15,12 @@
   --color-primary: #0078d4;
   --color-secondary: #2b88d8;
   --color-accent: #d40078;
+  --color-accent-light: color-mix(in srgb, var(--color-accent), white 30%);
+  --color-accent-dark: color-mix(in srgb, var(--color-accent), black 30%);
   --color-border: #ccc;
   --sidebar-width: 16rem;
   --color-danger: #e81123;
+  --color-danger-dark: color-mix(in srgb, var(--color-danger), black 30%);
   --color-success: #107c6f;
   --color-warning: #ffb900;
   --color-modal-overlay: color-mix(in srgb, var(--color-bg-dark), transparent 30%)
@@ -38,8 +41,11 @@
     --color-primary: #007acc;
     --color-secondary: #569cd6;
     --color-accent: #cc007a;
+    --color-accent-light: color-mix(in srgb, var(--color-accent), white 30%);
+    --color-accent-dark: color-mix(in srgb, var(--color-accent), black 30%);
     --color-border: #555;
     --color-danger: #e81123;
+    --color-danger-dark: color-mix(in srgb, var(--color-danger), black 30%);
     --color-success: #107c10;
     --color-warning: #ffb900;
     --color-modal-overlay: color-mix(in srgb, var(--color-bg-dark), transparent 30%);
@@ -156,6 +162,33 @@ button {
   &.btn--danger {
     background-color: var(--color-danger);
     color: var(--color-text);
+  }
+
+  &.btn--danger:hover {
+    background-color: var(--color-danger-dark);
+    color: var(--color-text);
+  }
+
+  &.btn--bg-hover:hover {
+    background-color: var(--color-bg);
+  }
+
+  &.btn--secondary {
+    background-color: var(--color-secondary);
+    color: var(--color-text);
+  }
+
+  &.btn--secondary:hover {
+    background-color: var(--color-primary);
+  }
+
+  &.btn--accent {
+    background-color: var(--color-accent);
+    color: var(--color-text);
+  }
+
+  &.btn--accent:hover {
+    background-color: var(--color-accent-dark)
   }
 }
 
