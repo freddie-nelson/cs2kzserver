@@ -1,6 +1,8 @@
 <script lang="ts">
   import { clearServerLogs, getServerLogs, type ServerLog } from "../api/api";
 
+  let { dashboard = false } = $props<{ dashboard?: boolean }>();
+
   const logs: ServerLog[] = $state([]);
   let refreshIntervalRaw = $state(2000);
   const refreshInterval = $derived(Math.max(1000, Math.min(60000, refreshIntervalRaw)));
@@ -33,8 +35,8 @@
   };
 </script>
 
-<main>
-  <div class="header">
+<main class="logs" class:dashboard>
+  <div class="header" class:hidden={dashboard}>
     <h1>Server Logs</h1>
 
     <div class="controls">
@@ -77,6 +79,10 @@
     gap: 0.5rem;
   }
 
+  .dashboard {
+    padding: 0;
+  }
+
   .header {
     display: flex;
     justify-content: space-between;
@@ -116,5 +122,9 @@
 
   .log-error {
     color: var(--color-danger);
+  }
+
+  .hidden {
+    display: none;
   }
 </style>

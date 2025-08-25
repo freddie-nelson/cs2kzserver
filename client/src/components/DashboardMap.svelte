@@ -32,11 +32,11 @@
   <div class="map-header">
     <h2 class="dashboard-card-title">Active Map</h2>
 
-    <button class="btn" onclick={() => (isChangeMapModalOpen = true)}>
+    <button class="btn" onclick={() => (isChangeMapModalOpen = true)} disabled={isChangingMap}>
       {isChangingMap ? "Changing..." : "Change Map"}
     </button>
 
-    <Modal title="Change Map" open={isChangeMapModalOpen} submit={changeMap}>
+    <Modal title="Change Map" bind:open={isChangeMapModalOpen} submit={changeMap}>
       <label>
         Select Map:
         <select name="map-name" bind:value={mapName}>
@@ -47,6 +47,7 @@
       </label>
     </Modal>
   </div>
+
   <div class="map-content">
     {#if data.activeMap}
       {#if data.serverConfig.maps.find((m) => m.name === data?.activeMap)}

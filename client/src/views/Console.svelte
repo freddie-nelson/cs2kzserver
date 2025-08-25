@@ -3,6 +3,8 @@
   import { getConsoleCommands, type ConsoleCommand } from "../api/consoleCommands";
   import { distance } from "fastest-levenshtein";
 
+  const { dashboard = false }: { dashboard?: boolean } = $props();
+
   const logs: ServerLog[] = $state([]);
   let sending = $state(false);
   let command = $state("");
@@ -99,7 +101,7 @@
   );
 </script>
 
-<main>
+<main class="con" class:dashboard>
   <div class="console">
     <div class="logs-container">
       {#each [...logs].reverse() as log}
@@ -147,18 +149,20 @@
     </form>
   </div>
 
-  <div class="commands">
-    <ul>
-      {#each filteredConsoleCommands as c}
-        <li>
-          <button class="btn" onclick={() => (command = c.command)}>
-            <strong>{c.command}</strong>: {c.description}
-            {c.defaultValue !== "cmd" ? `(default: ${c.defaultValue})` : ""}
-          </button>
-        </li>
-      {/each}
-    </ul>
-  </div>
+  {#if !dashboard}
+    <div class="commands">
+      <ul>
+        {#each filteredConsoleCommands as c}
+          <li>
+            <button class="btn" onclick={() => (command = c.command)}>
+              <strong>{c.command}</strong>: {c.description}
+              {c.defaultValue !== "cmd" ? `(default: ${c.defaultValue})` : ""}
+            </button>
+          </li>
+        {/each}
+      </ul>
+    </div>
+  {/if}
 </main>
 
 <style>
@@ -169,6 +173,15 @@
     overflow-y: auto;
   }
 
+  .dashboard {
+    padding: 0;
+    overflow-y: hidden;
+    height: 100%;
+
+    .console {
+      height: 100%;
+    }
+  }
   .console {
     height: 90%;
     width: 100%;

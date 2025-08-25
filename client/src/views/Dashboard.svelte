@@ -4,6 +4,8 @@
   import PluginGroups from "../components/PluginGroups.svelte";
   import StartStopButton from "../components/StartStopButton.svelte";
   import { useTimeAgo } from "../utils/timeago.svelte";
+  import Console from "./Console.svelte";
+  import Logs from "./Logs.svelte";
 
   let data: DashboardData | null = $state(null);
   let isRefreshing = $state(false);
@@ -81,6 +83,10 @@
       <DashboardMap {data} onMapChange={() => refreshData()} />
 
       <PluginGroups />
+
+      <Logs dashboard />
+
+      <Console dashboard />
     </div>
   {:else}
     <p>Loading...</p>
@@ -121,9 +127,8 @@
       "info info info info status status"
       "map map plgs plgs plgs plgs"
       "map map plgs plgs plgs plgs"
-      ". . . . . ."
-      ". . . . . ."
-      ". . . . . .";
+      "logs logs logs con con con"
+      "logs logs logs con con con";
   }
 
   .status {
@@ -185,5 +190,13 @@
     grid-area: plgs;
     width: 100%;
     height: 100% !important;
+  }
+
+  :global(.dashboard .logs) {
+    grid-area: logs;
+  }
+
+  :global(.dashboard .con) {
+    grid-area: con;
   }
 </style>
