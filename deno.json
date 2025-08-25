@@ -3,6 +3,8 @@
   "tasks": {
     "dev": "deno run --env-file --allow-net --allow-run --allow-env --allow-sys --allow-write --allow-read --watch src/main.ts",
     "start": "deno run build:client && deno run start:server",
+    "build": "deno run --allow-write --allow-read --allow-run --allow-env build.ts",
+    "build:server": "deno run build:client && deno compile --env-file --allow-net --allow-run --allow-env --allow-sys --allow-write --allow-read --output cs2servermanager src/main.ts",
     "build:client": "cd ./client && pnpm run build",
     "start:server": "deno run --env-file --allow-net --allow-run --allow-env --allow-sys --allow-write --allow-read src/main.ts"
   },

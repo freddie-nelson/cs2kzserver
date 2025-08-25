@@ -11,7 +11,7 @@ import {
   pluginsMap,
   togglePlugin,
 } from "./plugins.ts";
-import { convertExeToConsoleOrWindowMode } from "./exe.ts";
+import { convertExeToConsoleOrWindowMode, waitForProcess } from "./exe.ts";
 import { getServerConfig } from "./configs.ts";
 import { randomUUID } from "node:crypto";
 import { Rcon } from "rcon-client";
@@ -77,6 +77,8 @@ export async function updateCs2Server(
       "+validate",
     ]);
     pipeProcessLogsToServerLogs(installServerProcess);
+
+    await waitForProcess(installServerProcess);
 
     const modifiedExecutablePath = CS2_EXECUTABLE_PATH + ".modified";
     convertExeToConsoleOrWindowMode(CS2_EXECUTABLE_PATH, modifiedExecutablePath, "to_console");

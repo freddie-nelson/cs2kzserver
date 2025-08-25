@@ -13,6 +13,10 @@ if (import.meta.main) {
     await main();
   } catch (error) {
     console.error("An error occurred:", error);
+
+    // wait for key
+    console.log("Press any key to exit...");
+    await Deno.stdin.read(new Uint8Array(1));
     Deno.exit(1);
   }
 }

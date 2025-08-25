@@ -1,6 +1,7 @@
 import fs from "node:fs";
 import bufferpack from "bufferpack";
 import { Buffer } from "node:buffer";
+import { ChildProcess } from "node:child_process";
 
 function read(f: number, size: number, offset: number) {
   if (typeof size == "undefined") size = 1;
@@ -43,4 +44,16 @@ export function convertExeToConsoleOrWindowMode(
 
   fs.closeSync(source);
   fs.closeSync(dest);
+}
+
+export function waitForProcess(process: ChildProcess) {
+  return new Promise<void>((resolve, reject) => {
+    process.on("exit", (code) => {
+      if (code === 0) {
+        resolve();
+      } else {
+        reject(new Error(`Process exited with code ${code}`));
+      }
+    });
+  });
 }

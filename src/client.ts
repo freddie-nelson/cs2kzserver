@@ -26,6 +26,8 @@ import {
 import { z } from "zod/v4";
 import { toAbsolutePath } from "./path.ts";
 import { DOMParser } from "jsr:@b-fuze/deno-dom";
+import { exec } from "node:child_process";
+import { execSync } from "node:child_process";
 
 const getConfigSchema = z.object({
   name: z.string(),
@@ -424,4 +426,5 @@ export function startClient() {
       }
     }
   );
+  execSync(`start http://localhost:${CLIENT_PORT}`);
 }
